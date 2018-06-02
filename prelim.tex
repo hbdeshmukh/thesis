@@ -1,0 +1,82 @@
+\documentclass[11pt, oneside]{book}
+
+\usepackage[bookmarks=true,pdfborder={0 0 0}]{hyperref}
+\usepackage[center]{subfigure}
+\usepackage[justification=centering]{caption}
+\usepackage{afterpage}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+
+\usepackage{charter}
+\usepackage[T1]{fontenc}
+
+\usepackage{amssymb}
+\usepackage{color}
+\usepackage{enumerate}
+\usepackage{epsfig}
+\usepackage{epstopdf}
+\usepackage{fullpage}
+\usepackage{graphicx}
+\usepackage{here}
+\usepackage{multirow}
+\usepackage{mymacros}
+\usepackage{rotating}
+
+%\newtheorem{example}{Example}
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{lemma}{Lemma}
+%\newtheorem{property}{Property}
+%\newtheorem{problem}{Problem}
+
+\pagestyle{plain}
+\pagenumbering{arabic}
+%\input{mymacros}
+\linespread{1.3}
+\newcommand{\cchapter}[1]{\chapter[#1]{\centering #1}}
+\newcommand{\wo}{work order}
+\begin{document}
+
+\begin{centering}
+
+\vspace*{10ex} \textbf{\LARGE{\\Efficient Query Scheduling}} \LARGE{\\Harshad 
+Deshmukh\\Advisor: Jignesh M. Patel}
+\LARGE{\\PhD Preliminary Examination}
+
+\textit{\Large{\\April 18, 2016; 9:00 AM -- 10:30 AM;\\CS 4310, Computer
+Sciences Department\\University of Wisconsin-Madison, USA}}
+
+\textsf{\Large{\\harshad@cs.wisc.edu}}
+
+\end{centering}
+
+\normalsize
+
+\tableofcontents
+
+\cchapter {Introduction}
+\input{1-intro}
+
+\cchapter {Background of Quickstep}
+\input{2-background}
+
+\cchapter {Design and Evaluation of a Policy-based Query Scheduler}
+
+\input{3-design}
+\input{3-policies}
+\input{3-NUMA}
+\input{3-evaluation}
+
+\cchapter{Related Work}
+\input{4-related}
+
+\cchapter {Future Work}
+\input{5-future}
+
+\begin{small}
+\bibliographystyle{abbrv}
+\bibliography{prelim}
+\end{small}
+\clearpage
+
+\end{document}
