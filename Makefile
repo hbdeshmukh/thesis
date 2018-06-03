@@ -10,7 +10,7 @@ PREVIEW=-pv # Preview
 MAIN=harshad
 TEX_FILES := $(shell find . -type f -name "*.tex" )
 SOURCES=$(MAIN).tex Makefile $(TEX_FILES)
-FIGURES := $(shell find . -path '*/figures/*' -type f -printf '%P')
+FIGURES := $(shell find . -path '*/figures/*' -type f -printf '%P\n')
 
 all :	$(MAIN).pdf
 

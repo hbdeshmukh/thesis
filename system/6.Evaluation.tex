@@ -2,7 +2,7 @@
 
 \begin{figure*}[htb]
 \center
-\includegraphics[]{pictures/all-tpch-sf100.pdf}
+\includegraphics[]{system/figures/all-tpch-sf100.pdf}
 \caption{\textbf{Comparison with TPC-H, scale factor 100. Q17 and Q20 did not finish on PostgreSQL after an hour.}} %, and were aborted.}
 \label{fig-tpch-sf100}
 \end{figure*}
@@ -85,7 +85,7 @@ Unlike the other systems, Spark sometimes picks execution plans that are quite e
 
 \begin{figure*}[htb]
 \center
-\includegraphics[]{pictures/all-ssb-wt50.pdf}
+\includegraphics[]{system/figures/all-ssb-wt50.pdf}
 \caption{\textbf{Comparison with denormalized SSB, scale factor 50.}}
 \label{fig-ssb-sf50-widetable}
 %\vspace*{-1em}
@@ -175,8 +175,8 @@ As noted above (cf. Section~\ref{exp-tuning}), Quickstep uses a hybrid database 
 %We also recorded the time it took to load the data for each of the systems. The total time to load the data was 83 seconds for \Quickstep, 62 seconds for MonetDB, 96 seconds for PostgreSQL, and 93 seconds for Spark. The load times include the time to build indices as some of the systems automatically build indices on the primary and foreign keys that are declared in the schema. As noted in Section~\ref{indices}, we turned all indexing off in \Quickstep.
 
 \twoabfigures
-{pictures/ssb-sf100-storage-format-comparison-total}
-{pictures/ssb-sf100-storage-format-comparison}
+{system/figures/ssb-sf100-storage-format-comparison-total}
+{system/figures/ssb-sf100-storage-format-comparison}
 {\textbf{Impact of storage format on performance for SSB scale factor 100\vspace*{3em}}}
 {fig-ssb-sf100-rowstore}
 {Overall speedup}
@@ -184,8 +184,8 @@ As noted above (cf. Section~\ref{exp-tuning}), Quickstep uses a hybrid database 
 {bht}
 
 \twoabfigures
-{pictures/copy-elision-comparison-total}
-{pictures/copy-elision-comparison}
+{system/figures/copy-elision-comparison-total}
+{system/figures/copy-elision-comparison}
 {\textbf{Impact of template metaprogramming.}}
 {fig-template-metaprogramming}
 {Change in total time.}
@@ -249,8 +249,8 @@ The results for TPC-H are similar, and omitted in the interest of space.
 %In the next set of experiments, we aim to examine the impact of selected individual techniques in \Quickstep\ to determine their individual contribution. With these set of experiments, we leverage the fact that there are multiple implementations in Quickstep and we can use that to carry out a comparison of popular techniques and compare that on contemporary settings. For all the experiments presented in this section, we use SSB SF 100 and the 160 GB server machine that is described in Section~\ref{sec:ssb100}.
 
 \twoabfigures
-{pictures/lip-ef-impact-total}
-{pictures/lip-ef-impact}
+{system/figures/lip-ef-impact-total}
+{system/figures/lip-ef-impact}
 {\textbf{Impact of Exact Filter and LIP using SSB at scale factor 100.}}
 {fig-lip-ef-impact}
 {Overall speedup}
@@ -260,7 +260,7 @@ The results for TPC-H are similar, and omitted in the interest of space.
 \begin{figure*}[htb]
    \vspace*{3em}
   \centering
-   \includegraphics[width=\textwidth]{pictures/2-high-priority-queries.pdf}
+   \includegraphics[width=\textwidth]{system/figures/2-high-priority-queries.pdf}
    \caption{\textbf{Prioritized query execution. QX.Y(1) indicates that Query X.Y has a priority 1. Q4.2 and Q4.3 have higher priority (2) than the other queries (1).}}
    \label{fig-high-priority}
 \end{figure*}
@@ -311,7 +311,7 @@ An interesting aspect of using a work-order based scheduler (described in Sectio
 
 \begin{figure}[thb]
 \centering
-   \includegraphics[width=\columnwidth,height=4.2in]{pictures/q31-progress.pdf}
+   \includegraphics[width=\columnwidth,height=4.2in]{system/figures/q31-progress.pdf}
    \caption{\small \textbf{Query progress status. Green nodes (0-5) indicate work that is completed, the yellow node (6) corresponds to operators whose work-orders are currently being executed, and the blue nodes (7-13) show the work that has yet to be started.}}
    \label{fig-query-progress}
 \end{figure}
