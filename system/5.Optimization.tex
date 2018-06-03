@@ -1,0 +1,136 @@
+% !TEX root = quickstep.tex
+
+
+
+\section{Efficient Query Processing} \label{sec:query-opt}
+
+%The \Quickstep\ query optimizer has a modular architecture. It is based on a sequence of rules that incrementally transform a parse tree into an efficient execution DAG of relational operators. This architecture is illustrated in Figure~\ref{fig-queryoptimizer-arch}.
+
+%Similar to the approach outlined in~\cite{Volcano}, these rules operate on different intermediate representations: the \emph{logical} and \emph{physical query plan trees}. Each rule transforms the query plan tree by either annotating it or changing its structure. During query optimization, the rules are applied in a fixed sequence. The final execution DAG is passed to the scheduler for execution. The sequence of rules can be extended simply by adding a new transformation function in the appropriate position in the sequence.
+
+%There are various optimization rules at the logical/physical stages. Each rule is abstracted as a \emph{functor} that takes a query plan tree as input and produces the annotated or transformed query plan tree as output. All the rules are stored in an ordered array. During query optimization, the rules are applied sequentially in an explicit order to transform the query plan tree. To add a new rule in \Quickstep, one needs to inherit from a \emph{Rule} class and implement its virtual method \emph{apply}, and then insert the rule object into a proper position in the rule array.
+
+%All logical optimization rules are heuristic-based. Physical optimization rules can be either heuristic-based or cost-based. Typical heuristic-based optimizations such as \emph{filter pushdown}, \emph{projection collapsing}, and \emph{projection pushdown} are implemented as one-pass tree traversals. Some complex optimizations such as \emph{subquery unnesting}, \emph{join order optimization}, and \emph{LIP filter planning} require multiple traversals of the query plan tree and use auxiliary data structures within the rules.
+
+Quickstep builds on a number of existing query processing methods (as described in Section~\ref{overview}). The system also improves on existing methods for specific common query processing patterns. We describe these query processing methods in this section.
+
+%In this section, we describe some of the advanced query processing methods that Quickstep employs.
+Below, we first describe a technique that pushes down certain disjunctive predicates more aggressively than is common in traditional query processing engines. Next, we describe how certain joins can be transformed into cache-efficient semi-joins using \textit{exact filters}. Finally, we describe a technique called \textit{LIP} that uses Bloom filters to speed up the execution of join trees with a star schema pattern.
+
+The unifying theme that underlies these query processing methods is to eliminate redundant computation and materialization using a ``drop early, drop fast'' approach: aggressively pushing down filters in a query plan to drop redundant rows as early as possible, and using efficient mechanisms to pass and apply such filters to drop them as fast as possible.
+
+%We highlight two particularly interesting query processing techniques. To illustrate these techniques, we pick the example of Query 4.1 in the Star Schema Benchmark, shown in Figure~\ref{fig-q41-original}. This query involves joins between the fact table \texttt{lineorder} and four dimension tables \texttt{customer}, \texttt{part}, \texttt{supplier} and \texttt{date}. Three of these dimension tables have filtering predicates applied on them. Note that there are no attributes picked from the \texttt{part} and the \texttt{supplier} tables after the join with the \texttt{lineorder} table.
+
+\subsection{Partial Predicate Push-down}
+\label{sec-pushdown-disj-preds}
+While query optimizers regularly push conjunctive (\texttt{AND}) predicates down to selections, it is difficult to do so for complex, multi-table predicates involving disjunctions (\texttt{OR}). Quickstep addresses this issue by using an optimization rule that pushes down \textit{partial predicates} that conservatively approximate the result of the original predicate.
+
+Consider a complex disjunctive multi-relation predicate $P$ in the form $P = (p_{1,1} \wedge \dots \wedge p_{1, m_1}) \vee \dots \vee (p_{n,1} \wedge \dots \wedge p_{n, m_n})$, where each term $p_{i,j}$ may itself be a complex predicate but depends only on a single relation. While $P$ itself cannot be pushed down to any of the referenced relations (say $R$), we show how an appropriate relaxation of $P$, $P'(R)$, can indeed be pushed down and applied at a relation $R$.
+
+This predicate approximation technique derives from the insight that if any of the terms $p_{i,j}$ in $P$ does not depend on $R$, it is possible to relax it by replacing it with the tautological predicate $\top$ (i.e., \texttt{TRUE}). Clearly, this technique is only useful if $R$ appears in every conjunctive clause in $P$, since otherwise $P$ relaxes and simplifies to the trivial predicate $\top$. So let us assume without loss of generality that $R$ appears in the first term of every clause, i.e., in each $p_{i,1}$ for $i = 1,2,\ldots,n$. After relaxation, $P$ then simplifies to $P'(R) = p_{1,1} \vee p_{1,2} \vee \ldots \vee p_{1,n}$, which only references the relation $R$.
+
+The predicate $P'$ can now be pushed down to $R$, which often leads to significantly fewer redundant tuples flowing through the rest of the plan. However, since the exact predicate must later be evaluated again, such a partial push down is only useful if the predicate is selective. Quickstep uses a rule-based approach to decide when to push down predicates, but in the future we plan to expand this method to consider a cost-based approach based on estimated cardinalities and selectivities instead.
+
+There is a discussion of join-dependent expression filter pushdown technique in~\cite{BonczNE13}, but the overall algorithm for generalization, and associated details, are not presented. 
+The partial predicate push-down can be considered a generalization of such techniques.
+
+Note that the partial predicate push down technique is complimentary to implied predicates used in SQL Server~\cite{sql-server-implied-predicate} and Oracle~\cite{oracle-implied-predicate}.
+Implied predicates use statistics from the catalog to add additional filter conditions to the original predicate.
+Our technique does not add any new predicates, instead it replaces the predicates from another table to \texttt{TRUE}.
+%If used in conjunction of implied predicates, partial predicate push-down technique may improve the scan performance.
+
+%Next, consider applying $P$ on a relation, $R$. If for each $i$ in $1..n$, there exists at least one predicate $p_{i, k_i}$ that is applicable to $R$, then we construct a new predicate $P'$, where $P' = p_{1, k_1} \vee ... \vee p_{n, k_n}$. We can now push-down $P'$ to be applied to $R$.
+
+%We illustrate this technique using Query 7 from the TPCH benchmark, which involves the following disjunctive predicate between two instances of the \texttt{nation} table, \texttt{N1} and \texttt{N2}.
+%
+%\reminder{generalize this example. }
+%\begin{lstlisting}[language=SQL,upquote=true,
+%basicstyle=\ttfamily\scriptsize,
+%showstringspaces=false,
+%keywordstyle=\color{cardinal}\bfseries,
+%emphstyle=\color{bondiblue}\bfseries,
+%stringstyle=\color{bondiblue}\bfseries,
+%emph={}]
+%  (N1.n_name='FRANCE'  AND N2.n_name='GERMANY') OR
+%  (N1.n_name='GERMANY' AND N2.n_name='FRANCE' )
+%\end{lstlisting}
+%
+%While query optimizers regularly push conjunctive (\texttt{AND}) predicates down to selections, it is difficult to do so for complex predicates involving disjunctions (\texttt{OR}). Quickstep addresses this issue by using an optimization rule that pushes down partial predicates that over-approximate the result of the original predicate.
+%
+%For instance, in our motivating example, we see that predicates on \texttt{N1.n\_name} occur in both the conjunctive clauses in the disjunctive predicate. Conceptually, we can construct an approximate version of the predicate above by replacing the predicates on the \texttt{N2} table by the tautological predicate \texttt{TRUE}. Clearly, the resulting predicate after simplification, \texttt{(N1.n\_name=`FRANCE'  OR N1.n\_name=`GERMANY')}, is an over-approximation to the original predicate, since it filters out only a subset of the rows of the original one. To preserve the semantics of the original query, we must later apply the exact predicate higher up in the query plan, after the result of the join between \texttt{N1} and \texttt{N2} is available.
+%
+%In general, given a relation $R$ and a complex (disjunctive) predicate $p$ involving $R$ in combination with other relations, this technique constructs an approximation $p'$ that only involves $R$ by using trivial predicates to approximate each term in $p$ that involves relations other than $R$. The resulting simplified, approximate predicate can now be pushed down to $R$, eliminating redundant rows early in the query evaluation. Since the exact predicate must later be evaluated again, such a partial push down is only useful if the predicate is selective. Quickstep uses a rule-based approach to decide when to push down predicates, but in the future we plan to expand this method to consider a cost-based approach based on estimated cardinalities and selectivities instead.
+
+\subsection{Exact Filters: Join to Semi-join Transformation} \label{sec:ef}
+A new query processing approach that we introduce in this paper (which, to the best of our knowledge, has not been described before) is to identify opportunities when a join can be transformed to a semi-join, and to then use a  fast, cache-efficient semi-join implementation using a succinct bitvector data structure to evaluate the join(s) efficiently. This bitvector data structure is called an \textit{Exact Filter} (EF), and we describe it in more detail below.
+
+
+
+To illustrate this technique, consider the SSB~\cite{ssb} query Q4.1 (see Figure~\ref{fig-q41-original}). Notice that in this query the \texttt{part} table does not contribute any attributes to the join result with \texttt{lineorder}, and the primary key constraint guarantees that the \texttt{part} table does not contain duplicates of the join key. Thus, we can transform the \texttt{lineorder} -- \texttt{part} join into a semi-join, as shown in Figure~\ref{fig-q41-semijoin}. During query execution, after the selection predicate is applied on the \texttt{part} table, we insert each resulting value in the join key (\texttt{p\_partkey}) into an \textit{exact filter}. This filter is implemented as a bitvector, with one bit for each potential \texttt{p\_partkey} in the  \texttt{part} table. The size of this bitvector is known during query compilation based on the min-max statistics present in the catalog. (These statistics in the catalog are  kept updated for permanent tables even if the data is modified.) The EF is then probed using the \texttt{lineorder} table. The \texttt{lineorder} -- \texttt{supplier} join also benefits from this optimization.
+
+The implementation of semi-join operation using EF rather than hash tables improves performance for many reasons. First, by turning insertions and probes into fast bit operations, it eliminates the costs of hashing keys and chasing collision chains in a hash table. Second, since the filter is far more succinct than a hash table, it improves the cache hit ratio. Finally, the predictable size of the filter eliminates costly hash table resize operations that occur when selectivity estimates are poor.
+
+The same optimization rule also transforms anti-joins into semi-anti-joins, which are implemented similarly using EFs.
+
+\subsection{Lookahead Information Passing (LIP)} \label{sec:lip}
+Quickstep also employs a join processing technique called LIP that combines the ``drop early'' and ``drop fast'' principles underlying the techniques we described above. We only briefly discuss this technique here, and refer the reader to related work~\cite{zhu2017looking} for more details.
+
+Consider SSB Query 4.1 from Figure~\ref{fig-q41-original} again. The running time for this query plan is dominated by the cost of processing the tree of joins. We observe that a \texttt{lineorder} row may pass the joins with \texttt{supplier} and \texttt{part}, only to be dropped by the join with \texttt{customer}. Even if we assume that the joins are performed in the optimal order, the original query plan performs redundant hash table probes and materializations for this row. The essence of the LIP technique is to look ahead in the query plan and drop such rows early. In order to do so efficiently, we use \emph{LIP filters}, typically an appropriately-configured Bloom filter~\cite{Bloom70Space}.
+
+%Another technique that Quickstep employs to speed up processing of join queries is called LIP. This technique has been described in more detail~\cite{zhu2017looking}, and we only describe this technique briefly here using the example query show in Figure~\ref{fig-q41-original}. %After that we describe how LIP is implemented in Quickstep, highlighting how its implementation is centered around the hash table construction method.
+
+The LIP technique is based on semi-join processing and sideways information passing~\cite{Bernstein1981SemiJoin, Ives2008Sideways, Beeri1987Magic}, but is applied more aggressively and optimized for left-deep hash join trees in the main-memory context. For each join in the join tree, during the hash-table build phase, we insert the build-side join keys into an LIP filter. Then, these filters are all passed to the probe-side table, as shown in Figure~\ref{fig-q41-lip}. During the probe phase of the hash join, the probe-side join keys are looked up in all the LIP filters prior to probing the hash tables. Due to the succinct nature of the Bloom filters, this LIP filter probe phase is more efficient than hash table probes, while allowing us to drop most of the redundant rows early, % in the join tree,
+effectively pushing down all build-side predicates to the probe-side table scan.
+
+During query optimization, Quickstep first pushes down predicates (including partial push-down described above) and transforms joins to semi-joins. The LIP technique is then used to speed up the remaining joins. Note that our implementation of LIP generalizes beyond the discussion here to also push down filters across other types of joins, as well as aggregations. In addition to its performance benefits, LIP also provably improves robustness to join order selection through the use of an adaptive technique, as discussed in detail in~\cite{zhu2017looking}.
+
+% During the build phase of the hash join operation, the build-side join keys are inserted into an \emph{LIP filter}, typically a Bloom filter~\cite{Bloom70Space}. During the probe phase of the hash join, the join keys of the probe table are first looked up in the LIP filter, and only the matching keys are used to probe the hash table. %A Bloom filter lookup is far more efficient than a hash table lookup, both due to increased cache efficiency as well as the lack of collision chain probes.
+%In a pipeline of join operations, the LIP technique allows combining probes into LIP filters from all the build-side tables in a left-deep hash join tree. For the SSB Query 4.1 in Figure~\ref{fig-q41-original}, for example, in addition to the hash tables on \texttt{supplier}, \texttt{part} and \texttt{customer} tables, we also build corresponding LIP filters. The join keys from \texttt{lineorder} table are used to probe all of these filters before any of the hash tables are probed. This ensures that information from all build-side predicates is used to pre-filter the probe side tuples efficiently, greatly reducing the number of hash table lookups that follow. %The multi-way probe into multiple LIP filters is done using a novel adaptive algorithm that provably achieves the minimum number of filter lookups by efficiently reordering the filters based on their selectivities.
+
+
+%We note that while we have recently proposed LIP~\cite{zhu2017looking}, in that previous paper LIP was largely applied to queries in the SSB benchmark and was only applicable when the schema was star shaped. We now have an implementation in Quickstep so that we can apply LIP even with schemas that are not star-shaped (e.g. TPC-H) and look for embedded sub-schemas that are star shaped and apply LIP selectively in that space. Thus, we can now speed up many TPC-H queries with the LIP approach.
+
+%A key decision for any data processing engine is to pick the order in which to join tables. The optimal join order depends, most importantly, on the selection and join selectivities of the predicates in the query. These predicate selectivities are notoriously hard to estimate, particularly for real-world data with skew and correlation. While a plethora of cardinality estimation techniques have been proposed in literature, we have recently developed a novel approach to the join order selection problem, \emph{Lookahead information passing} (LIP)~\cite{zhu2017looking}.
+
+%LIP builds upon well-known optimization techniques such as semijoin strategy and sideways information passing~\cite{Bernstein1981SemiJoin, Ives2008Sideways, Beeri1987Magic}, but is optimized for the main-memory database context. This technique not only improves performance of a given query plan, but also greatly increases its robustness to cardinality estimation errors.
+
+%During the build phase of the hash join operation, the build-side join keys are inserted into an \emph{LIP filter}, typically a Bloom filter~\cite{Bloom70Space}. A Bloom filter is a succinct, probabilistic representation of a set and is used in semi-join optimizations to pass information about the predicate results from the build side of the join to the probe side. During the probe phase of the hash join, the join keys of the probe table are first looked up in the LIP filter, and only the matching keys are used to probe the hash table. A Bloom filter lookup is far more efficient than a hash table lookup, both due to increased cache efficiency as well as the lack of collision chain probes.
+
+%\twoabfigures
+%{pictures/ssb-sf10-osx-total}
+%{pictures/ssb-sf10-osx}
+%{Comparison of performance for SSB scale factor 10}
+%{fig-ssb-sf10-osx}
+%{Total execution times}
+%{Detailed query execution times}
+%{htb}
+%
+%The LIP technique goes beyond the traditional semi-join technique, however, by combining probes into LIP filters from all the build-side tables in a left-deep hash join tree. For the SSB Query 4.1 in Figure~\ref{fig-q41-original}, for example, in addition to the hash tables on \texttt{supplier}, \texttt{part} and \texttt{customer} tables, we also build corresponding LIP filters. The join keys from \texttt{lineorder} table are used to probe all of these filters before any of the hash tables are probed. This ensures that information from all build-side predicates is used to pre-filter the probe side tuples efficiently, greatly reducing the number of hash table lookups that follow. %The multi-way probe into multiple LIP filters is done using a novel adaptive algorithm that provably achieves the minimum number of filter lookups by efficiently reordering the filters based on their selectivities.
+
+%We have found that the LIP technique guarantees nearly optimal performance and very high robustness to cardinality estimation errors, both theoretically as well as empirically.
+
+%We note that while we have recently proposed LIP~\cite{zhu2017looking}, in that previous paper LIP was largely applied to queries in the SSB benchmark and was only applicable when the schema was star shaped. We now have an implementation in Quickstep so that we can apply LIP even with schemas that are not star-shaped (e.g. TPC-H) and look for embedded sub-schemas that are star shaped and apply LIP selectively in that space. Thus, we can now speed up many TPC-H queries with the LIP approach.
+
+
+%\subsection{Unified Framework for Exact Filter and LIP}
+%\label{sec-EF-and-LIP}
+%In this section, we describe how the Exact Filters and LIP method work together in Quickstep.
+%
+%\reminder{For JQ and Nav:
+%The query optimizer first detects when the Exact Filter (EF) and the LIP techniques can be applied (which required detecting a sequence of primary key-foreign key joins in the query plan). Then, a pass is made to determine when joins can be transformed to semi-joins, and the corresponding EF bit vectors are created for processing. The remaining joins are then processed using the LIP approach. In constructing the LIP filters an optimization is made so that an identity hash function is used for the LIP Bloom filters if the join attributes are integer primary-keys/foreign-keys.}
+
+%The implementation of the LIP filters in Quickstep uses an abstract interface, that currently has three concrete implementations. The most general implementation is a Bloom filter, and it is applicable to join-attribute(s) of any type.
+
+%If the LIP filter is for a single join-attribute of fixed-length type, we prefer using a faster implementation, called \textit{SingleIdentityHashFilter},
+%which is a specialized form of a Bloom filter that uses %only one hash functionthat is
+%an identity hash function; i.e. we simply reinterpret the bytes of an attribute value as an integer as its hash code. This approach works well for
+%%This works well with SSB and TPC-H queries since the
+%join attributes that are integer primary-keys/foreign-keys.
+%
+%Furthermore, if by statistics we know that the join attribute is of integer type and has
+%a relatively small range and dense distribution, and if we know the exact lower bound
+%and upper bound of that range.
+%Then we use an ExactFilter to omit any false positives -- this results in even better performance.
+
+
+

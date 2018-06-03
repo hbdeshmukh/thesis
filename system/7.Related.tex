@@ -1,0 +1,40 @@
+% !TEX root = quickstep.tex
+
+\section{Related Work} \label{related}
+%The focus of this paper is on high performance in-memory analytics computing, and this paper narrows its focus to single machine NUMA settings. 
+We have noted related work throughout the presentation of this paper, and we highlight some of the key areas of overlapping research here. 
+
+There is tremendous interest in the area of main-memory databases and a number of systems have been developed, including~\cite{LarsonCFHMNPPRRS13, BonczKM08, RamanABCKKLLLLMMPSSSSZ13, hyper, XinRZFSS13, scuba, SparkSQL, vectorwise, FarberMLGMRD12, oracledbim}, 
+%MonetDB~\cite{BonczZN05, BonczKM08, IdreosGNMMK12}, Blink~\cite{RamanSQRDKNS08}, Hyper~\cite{hyper}, Shark~\cite{XinRZFSS13}, Scuba~\cite{scuba}, SparkSQL~\cite{SparkSQL}, VectorWise~\cite{vectorwise}, SAP HANA~\cite{FarberMLGMRD12},  IBM DB2 BLU~\cite{RamanABCKKLLLLMMPSSSSZ13}, and Microsoft SQL Server~\cite{LarsonCFHMNPPRRS13}. 
+While similar in motivation, our work employs a unique block-based architecture for storage and query processing, as well as fast query processing techniques for in-memory processing. The combination of these techniques not only leads to high performance, but also gives rise to interesting properties in this end-to-end system, such as elasticity (as shown in Section~\ref{sec:expt:elasticity}).
+
+Our vectorized execution on blocks has similarity to the work on columnar execution methods, including recent proposals such as~\cite{SIMD-DBMS, RamanSQRDKNS08, JohnsonRSS08,WillhalmPBPZS09, WillhalmO0F13, bitweaving, AbadiMF06,  QiaoRRHL08, FengLKX15}. 
+\Quickstep's template metaprogramming-based approach relies on compiler optimizations to make automatic use of SIMD instructions. Our method is complementary to run-time code generation (such as~\cite{JohnsonRSS08,WillhalmPBPZS09, WillhalmO0F13, AbadiMF06,  QiaoRRHL08, FengLKX15, archofadb, Neumann11, SparkSQL, PirkMZM16, NagelBV14, SIMD-DBMS, RamanSQRDKNS08}). Our template metaprogramming-based approach uses static (compile-time) generation of the appropriate code for processing tuples in each block. This approach eliminates the per-query run-time code generation cost, which can be expensive for short-running queries. An interesting direction for future work is to consider combining these two approaches.
+
+% and we largely use BitWeaving as an index in this work, which falls under a broader class of efficient bit-based indexing/storage methods that are optimized for modern processors~\cite{FengL15, RamanSQRDKNS08, JohnsonRSS08, ONeilQ97, RinfretOO01, ChanI98, Wu99, Johnson99, Lamport75, WuOS06, Warren77,Barber12, FengLKX15}. We also use CSB+Tree~\cite{csbtree} as another indexing structure. 
+
+%The implications of NUMA architectures for performance is well-known and has been a subject of significant research over the past few years. Some of the earliest work on query processing for NUMA includes the work by Bouganim et al.~\cite{BouganimFV97}. As NUMA architectures have become more main-stream, there has been a renewed interest in determining the impact of such change on analytical query processing, including~\cite{BlanasP13, BlanasLP11, LiPMRL13, BalkesenTAO15, BalkesenATO13,BarberLPRSACLS14,KieferSL13, KieferKSHML14, PsaroudakisSMSA15}.
+
+The design of \Quickstep's storage blocks has similarities to the tablets in Google's BigTable~\cite{DBLP:conf/osdi/ChangDGHWBCFG06}.
+However, tablets' primary purpose is to serve sorted key-value store applications whereas  \Quickstep's storage blocks adhere to a  relational data model allowing for optimization such as efficient expression evaluation (cf. Section~\ref{vectorization}).
+
+Our use of a block-based storage design naturally leads to a block-based scheduling method for query processing, and this connection has been made by Chasseur et al.~\cite{ChasseurP13} and Leis et al.~\cite{LeisBK014}.
+In this work, we build on these ideas. 
+We also leverage these ideas to allow for desirable properties, such as dynamic elastic behavior (cf. Section~\ref{sec:expt:elasticity}).
+
+Philosophically, the block-based scheduling that we use is similar to the MapReduce style query execution~\cite{mapreduce}. 
+A key difference between the two approaches is that there is no notion of pipelining in the original MapReduce framework, however \Quickstep\ allows for pipelined parallelism.  Further, in Quickstep common data structures (e.g. an aggregate hash table) can be shared across different tasks that belong to the same operator.
+
+The exact filters build on the rich history of semi-join optimization dating back at least to Bernstein and Chiu~\cite{Bernstein1981SemiJoin}. The LIP technique presented in Section~\ref{sec:lip} also draws on similar ideas, and is described in greater detail in~\cite{zhu2017looking}. 
+
+Achieving \textit{robustness} in query processing is a goal for many database systems~\cite{graefe_et_al:DSP:2011:2984}.
+\Quickstep\ uses the LIP technique to achieve robust performance for star-schema  queries. 
+We formally define the notion of robustness and prove the robustness guarantees provided by Quickstep. 
+VectorWise uses micro-adaptivity technique~\cite{DBLP:conf/sigmod/RaducanuBZ13} for robustness, but their focus is largely on simpler scan operations.
+
+%There is a large body of work on auto-tuning parameters in a database engine (e.g.~\cite{ChaudhuriN07}) and self-managing databases (e.g.~\cite{ChaudhuriW00})
+
+Overall, we articulate the growing need for the scaling-up approach, and present the design of \Quickstep\ that %employs fast kernels for data processing coupled with a flexible scheduler-based query processing architecture that 
+is designed for a very high-level of intra-operator parallelism to address this need. We also present a set of related query processing and optimization methods. Collectively our methods achieve high performance on modern multi-core multi-socket machines for in-memory settings.
+
+%with novel indexing and data normalization methods that are optimized for NUMA settings for in-memory analytical data processing environments. 

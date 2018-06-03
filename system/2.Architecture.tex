@@ -1,0 +1,99 @@
+% !TEX root = quickstep.tex
+%\begin{figure}
+% \centering
+%  \includegraphics[height=.45\columnwidth, natwidth=1252bp, natheight=822]{pictures/logical-architecture.png}
+%   \caption{The Quickstep logical architecture.}
+%   \label{fig-logical-arch}
+%   \vspace*{-1em}
+%\end{figure}
+
+\section{\QUICKSTEP\ Architecture} 
+
+\label{architecture}
+%The logical view of the Quickstep system is illustrated in Figure~\ref{fig-logical-arch}. 
+Quickstep
+implements a collection of relational algebraic operators, using efficient algorithms for each operation. % that come close to producing bare-metal performance for the individual operations
+ %(more details are discussed in Section~\ref{evaluation}). 
+This ``kernel'' can be used to run a variety of applications, including SQL-based data analytics (the focus of this paper) and other classes of analytics/machine learning (using the approach outlined in~\cite{FanRP15, QuickFOIL}). This paper focuses only on SQL analytics.
+%a.k.a. Data Warehousing), but can also include other analytical application classes. These other classes are graph analytics, many propositional machine learning methods, and relational learning. These applications can be supported as they can be mapped to an underlying relational algebra (using methods such as~\cite{FanRP15, QuickFOIL, madlib, JindalR0MDS14}). The focus of this paper is only on the SQL analytics component, and we omit further discussion of the other application classes in this paper, and refer the interested reader to recipes for supporting graph analytics~\cite{FanRP15}, relational learning~\cite{QuickFOIL} and document stores~\cite{json-relational} as examples of applications that go beyond SQL. 
+
+\subsection{Query Language and Data Model} \label{model-n-query-language}
+
+\Quickstep\ uses a relational data model, and SQL as its query language. 
+%Table~\ref{table:types} describes the various types currently supported by \Quickstep. 
+Currently, the system supports the following types: \texttt{INTEGER} (32-bit signed), \texttt{BIGINT}/\texttt{LONG} (64-bit signed), \texttt{REAL}/\texttt{FLOAT} (IEEE 754 \textit{binary32}), \texttt{DOUBLE PRECISION} (IEEE 754 \textit{binary64}), fixed-point \texttt{DECIMAL}, fixed-length \texttt{CHAR} strings, variable-length \texttt{VARCHAR} strings,  \texttt{DATETIME}/\texttt{TIMESTAMP} (with microsecond resolution), date-time \texttt{INTERVAL}, and year-month \texttt{INTERVAL}. 
+
+%\begin{table}[t]
+%	\centering
+%	\begin{tabular}{|p{2.5cm}|p{4.5cm}|} \hline
+%		\multirow{5}{*}{\textbf{Numeric types}} &  \small{\texttt{INTEGER} (32-bit signed)} \\ & \small{\texttt{BIGINT}/\texttt{LONG} (64-bit signed)} \\  & \small{\texttt{REAL}/\texttt{FLOAT} (IEEE 754 \textit{binary32} format)} \\ & \small{\texttt{DOUBLE PRECISION} (IEEE 754 \textit{binary64} format)} \\ & \small{fixed-point \texttt{DECIMAL}} \\ \hline
+%		\multirow{5}{*}{\textbf{Non-numeric types}} & \texttt{CHAR} strings \\ & variable-length  \texttt{VARCHAR} strings \\ & \texttt{DATETIME}/\texttt{TIMESTAMP} (microsecond resolution) \\ & Date-time \texttt{INTERVAL} \\ & Year-month \texttt{INTERVAL} \\ \hline  
+%	\end{tabular}
+%	\caption{Types in \Quickstep}
+%	\label{table:types}
+%\end{table}
+%All these data types support \texttt{NULL} values including three-valued comparison logic. %The type system code is internally organized as a (C++) hierarchy, making it easy to add new types. %However, adding new types requires recompilation of the system; i.e., we do not have dynamic types or user-defined types, although the type system subcomponent has been designed to allow for such additions in the future. 
+
+%\Quickstep\ currently supports a limited class of SQL, including correlated queries. It currently does not support SQL window functions. 
+
+
+\subsection{System Overview} \label{overview}
+The internal architecture of \Quickstep\ %is shown in Figure~\ref{fig-block-arch}, and 
+resembles the architecture of a typical DBMS engine. A distinguishing aspect is that Quickstep has a query scheduler (cf. Section~\ref{scheduler}), which plays a key first-class role allowing for quick reaction to changing workload management (see evaluation in Section~\ref{sec:expt:elasticity}). A SQL \textit{parser} converts the input query into a syntax tree, which is then transformed by an optimizer into a physical plan. The \textit{optimizer} %converts the syntax tree into a logical plan, and then 
+uses a rules-based approach~\cite{Volcano} to transform the logical plan into an optimal physical plan. %The query optimizer is further described in Section~\ref{sec:query-opt}.
+The current optimizer %simple (but extensible) and 
+supports projection and selection push-down, and both bushy and left-deep trees. 
+
+A \textit{catalog manager} stores the logical and physical schema information, and associated statistics, including table cardinalities, the number of distinct values for each attribute, and the minimum and maximum values for numerical attributes. 
+%More sophisticated statistics such as histograms are planned for addition in the future. 
+%The catalog manager supports an API to write all the catalogs as a \textit{protobuf} to allow exporting the schema for external purposes, such as sending the schema to a stand-alone optimizer like Orca~\cite{Orca} or Apache Calcite~\cite{calcite}. %(Our longer-term plan is to switch out our existing optimizer and leverage a community-based optimizer like Calcite or Orca.)
+%The catalog manager can export the schema information for use in external systems such as a stand-alone optimizer like Orca~\cite{Orca} or Apache Calcite~\cite{calcite}.
+
+A \textit{storage manager} organizes the data into large multi-MB blocks, and is described in Section~\ref{storage-manager}. 
+
+An execution plan in Quickstep is a directed acyclic graph (DAG) of relational operators. The execution plan is created by the optimizer, and then sent to the \textit{scheduler}. The scheduler is described in Section~\ref{query-exec}.
+
+A \textit{relational operator library} contains 
+implementation of various relational operators. Currently, the system has 
+implementations for the following operators: select, project, joins (equijoin, semijoin, antijoin and outerjoin), aggregate, sort, and top-k. 
+%Additional details about the operators are provided in Section~\ref{operators}.
+
+Quickstep implements a hash join algorithm in which the two phases, the build phase and the probe phase, are implemented as separate operators. The build hash table operator reads blocks of the build relation, and builds a single cache-efficient hash table in memory using the join predicate as the key (using the method proposed in~\cite{BlanasLP11}). The probe hash table operator reads blocks of the probe relation, probes the hash table, and materializes joined tuples into in-memory blocks. % for consumption by other operators. 
+Both the build and probe operators take advantage of block-level parallelism, and use a latch-free concurrent hash table to allow multiple workers to proceed at the same time. 
+
+For non-equijoins, a block-nested loops join 
+algorithm is used.  %(which also allows a ``residual'' filter predicate to be used with a hash-join to filter joined tuple pairs on a non-equijoin predicate in addition to the equality predicate evaluated by hashing). %Note that the resize operation of hash table is not lock-free.
+The hash join method has also been adapted to support left outer join, left semijoin, and antijoin operations.
+
+For aggregation without \texttt{GROUP BY}, local aggregates for each input block are computed, which are then merged to compute the global aggregate.
+%with the global aggregates for the entire query. 
+For aggregation with \texttt{GROUP BY}, a global latch-free hash table of aggregation handles is built (in parallel), using the grouping columns as the key.
+
+The sort and top-K operators use a two-phase algorithm. %These phases are implemented as separate operators. 
+In the first phase, each block of the input relation is sorted in-place, or copied to a single temporary sorted block. 
+%This phase is similar to the run generation phase of the traditional external sort. 
+%In the second phase, runs of sorted blocks are merged to produce a fully sorted output relation.
+These sorted blocks are merged in the second (final) phase.
+
+%\begin{figure}   
+%  \centering
+%   \includegraphics[width=0.25\textwidth]{pictures/block-architecture.pdf}
+%   \caption{The \Quickstep\ internal architecture.}
+%   \label{fig-block-arch}
+%\end{figure}
+
+
+
+%Each block contains tuples from a single table, and is treated as a ``mini-database.'' Different blocks, even within the same table, may have different physical organizations. The external view of each block is that of a bag of tuples, and query processing simply invokes set-oriented methods on each block. This design allows for the physical schema of each block to evolve independently. There are no global indices in \Quickstep; instead indices are also self-contained within blocks. Different block formats are supported including column stores and row stores (see Section~\ref{storage-manager} for more details). % along with BitWeaving and CSB+-Tree indices. 
+%The default layout is a column store.  
+
+%This unique storage manager design implies that tuples in one block for a table may be organized as a column-store (as queries on that block may involve selecting only a few attributes), while another block for the same table may be organized as a row-store (with perhaps CSB+-Tree indices). Each block can be optimized for its local pattern of access, which can be recorded succinctly within each block and \textit{morphed} using techniques similar to those proposed in~\cite{HankinsP03}. 
+%(We have not implemented the data morphing techniques and that is part of planned future work.) %; for now, we have a tool that can specify the physical layout of each block using user-supplied hints.) 
+
+%It is natural to wonder whether such a flexible storage system complicates the task of optimizing access path selection. This issue is addressed by removing the responsibility of low-level physical access path selection from the global query optimizer and embedding it in the individual blocks. Thus, blocks decide for themselves based on their physical organization how to implement simple relational operations like predicate evaluation and projection. % exposed to operators by the storage block API. 
+%So, a scan on one block may scan all the columns in a column-store block, and the scan on another block that has an index on the scan predicate may end up using an index. Simple statistics on attributes are kept within each block to aid in this run-time decision. These statistics also generalize to small materialized aggregates (SMAs)~\cite{sma}, which are supported in \Quickstep. 
+
+%(An interesting direction of future work is to epxlore methods such as the cracking approach in MonetDB~\cite{IdreosKM07}.)
+
+%The \textit{scheduler} is another unique component of the system. % that works with the \textit{transactional message bus} (TMB) component. 
+%The scheduler breaks up a query into various \textit{work orders} and query execution is essentially a series of work order generation and completion tasks. Details about the scheduler are presented in Section~\ref{scheduler}. 

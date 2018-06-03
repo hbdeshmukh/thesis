@@ -1,0 +1,95 @@
+\documentclass{vldb}
+\usepackage{graphicx}
+\usepackage{balance}  % for  \balance command ON LAST PAGE  (only there!)
+
+% Include information below and uncomment for camera ready
+\vldbTitle{Quickstep: A Data Platform Based on the Scaling-Up Approach}
+\vldbAuthors{ Jignesh M. Patel, Harshad Deshmukh, Jianqiao Zhu, Navneet Potti, Zuyu Zhang, Marc Spehlmann, Hakan Memisoglu, and Saket Saurabh}
+\vldbDOI{https://doi.org/10.14778/3184470.3184471}
+
+\usepackage{times,amsmath,epsfig}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage[noend]{algorithmic}
+%\usepackage[center]{subfigure}
+\usepackage{subcaption}
+\usepackage{color,graphicx}
+\usepackage{multirow}
+\usepackage{cite}
+\usepackage{textcomp}
+\usepackage{caption}
+\usepackage{amssymb}
+\usepackage{url}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{balance} 
+
+\newcommand{\Quickstep}{Quickstep}
+\newcommand{\QUICKSTEP}{QUICKSTEP}
+\newcommand{\reminder}[1]{\textcolor{red}{\em $\rightarrow$ (#1) $\leftarrow$}}
+
+\newcommand{\twoabfigures}[7]{
+\begin{figure*}[#7]
+    \flushleft
+    \begin{subfigure}[b]{0.18\textwidth}
+				\includegraphics{#1}
+%				\vspace*{-1em}
+        \caption{#5}
+    \end{subfigure}
+    ~%add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+      %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[b]{0.66\textwidth}
+				\includegraphics{#2}
+%				\vspace*{-1em}
+        \caption{#6}
+    \end{subfigure}
+% 	\vspace*{-0.5em}
+     \caption{#3}
+     \label{#4}
+%    	\vspace*{-1em}
+\end{figure*}
+}
+
+\definecolor{cardinal}{rgb}{0.77, 0.12, 0.23}
+\definecolor{bondiblue}{rgb}{0.0, 0.58, 0.71}
+
+\begin{document}
+\title{Quickstep: A Data Platform Based on the Scaling-Up Approach\titlenote{The Quickstep project code lives in the Apache repository at: \small{\url{https://github.com/apache/incubator-quickstep}}.\vspace*{1ex}}}
+\numberofauthors{1}
+\author{
+\alignauthor 
+ Jignesh M. Patel,
+ Harshad Deshmukh,
+ Jianqiao Zhu,
+ Navneet Potti, \\
+ Zuyu Zhang, 
+ Marc Spehlmann,
+ Hakan Memisoglu, 
+ Saket Saurabh \\
+\affaddr{Computer Sciences Department}\\
+\affaddr{University of Wisconsin -- Madison}\\
+\email{\hspace*{-8ex}\{jignesh, harshad, jianqiao, nav, zuyu, spehlmann, memisoglu, ssaurabh\}@cs.wisc.edu}
+}
+\date{}
+\maketitle
+
+\input{0.Abstract}
+\input{1.Intro}
+\input{2.Architecture}
+\input{3.SM}
+\input{4.Execution}
+\input{5.Optimization}
+\input{6.Evaluation}
+\input{7.Related}
+\input{8.Conclusions}
+
+% ensure same length columns on last page (might need two sub-sequent latex runs)
+%\balance
+
+\section{Acknowledgments}
+This work was supported in part by the National Science Foundation under grants  IIS-0963993, IIS-1110948, and IIS-1250886, and by gift donations from Google, Huawei and Pivotal. A project like \Quickstep\ would not have been possible without the support and contributions from many people over the years. In this regard, we would especially like to thank Shoban Chandrabose, Craig Chasseur, Julian Hyde, Rogers Jeffrey Leo John, Yinan Li, Adalbert Gerald Soosai Raj, Vaishnavi Sashikanth, Rathijit Sen, Gavin Sherry, Shivakumar Venkataraman and Qiang Zeng.  
+
+\balance
+\bibliographystyle{abbrv}
+\bibliography{refs} 
+\end{document}
