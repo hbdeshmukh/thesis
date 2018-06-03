@@ -5,7 +5,7 @@ Query processing systems today face a host of challenges that were not as promin
 
 \begin{figure}
 \centering
-   \includegraphics[width=\columnwidth]{pictures/deficit.pdf}
+   \includegraphics[width=\columnwidth]{system/figures/deficit.pdf}
    \vspace*{-2em}
    \caption{\textbf{Processor performance improvement as measured by the highest reported CINT2006 benchmark result for Intel Xeon chips from~\cite{cpu2006} compared to the number of pages indexed by Google (using estimates made by~\cite{google-pages-db}). The figure does not show the increase in the number of queries (which is about 2.5X for Google search queries from 2011--14), and the increase in the complexity of queries as applications request richer analytics. These aspects make the deficit problem worse. The figure also shows the maximum number of cores per chip used in reported CINT2006 results over time. Interestingly (and not shown in the figure), both the minimum and the average amount of memory per chip in the reported CINT2006 results has grown by $\approx$4X from 2011 to 2017.}}
    % For example, the number of Google search queries has gone up by a factor of 6X in the time period shown in the graph above.}
@@ -78,7 +78,7 @@ predicate over-approximation scheme. Quickstep also uses cache-efficient filter 
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.5\textwidth]{pictures/tpch-q10-waterfall.pdf}
+	\includegraphics[width=0.5\textwidth]{system/figures/tpch-q10-waterfall.pdf}
 	\caption{\textbf{A waterfall chart showing the impact of various techniques in Quickstep for query 10 from the TPC-H benchmark running on a 100 scale factor database. RS (Row Store), and CCS (Compressed Column Store) are both supported in Quickstep (see Section~\ref{block-structure}). Basic and Selection are template metaprogramming optimizations (described in Section~\ref{vectorization}), which relate to the efficiency of predicate and expression evaluation. LIP (Lookahead Information Passing, described in Section~\ref{sec:lip}) is a technique to improve join performance. Starting with a configuration (Basic + RS), each technique is introduced one at a time to show the individual impact of each technique on this query.}}
 	\label{fig:tpch-q10-waterfall}
 \end{figure}
