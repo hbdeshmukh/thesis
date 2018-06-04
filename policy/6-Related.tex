@@ -1,0 +1,130 @@
+% !TEX root = scheduler.tex
+\section{Related Work}\label{sec:related}
+%We now describe the related work on scheduling in database systems, operating systems (OS), and networks. %, and cluster computing. 
+
+The \textit{work orders} abstraction is similar to other abstractions like \textit{morsels} in Hyper~\cite{morsel} and the \textit{segment-based parallelism}~\cite{wang2016elastic}. 
+Such abstractions provide a means to achieve high intra-query, intra-operator data parallelism.
+Hyper~\cite{morsel} uses a \textit{pull-based} scheduling approach i.e. workers \textit{pull} work (morsels) from a pool.
+%Every worker thread continues to pull a morsel from a global pool, and executes it.
+We use a \textit{push-based} model, where the scheduler controls the assignment of work to workers.
+The pull-based dispatch model suffices for executing one query at a time. 
+However, a push-based model can be simpler to implement sophisticated functionalities such as priority-based query scheduling, incorporating a flow control across multiple pipelines, (as shown in~\cite{wang2016elastic}), cache-conscious task scheduling.
+
+The elastic pipelining implementation~\cite{wang2016elastic} uses a \textit{scalability vector} to vary the degree of parallelism of segments of the query plan.
+The scalability vector tracks the query performance when number of cores are varied,  and it does not use any prediction technique.
+Their objective is to maximize the performance of a single query executed on a cluster.
+Our work focuses on resource sharing among concurrent queries, by enforcing policies using a learning-based approach. 
+Additionally, we can accommodate estimates provided by other techniques.
+
+There is related work~\cite{gupta2009fair} on ordering queries in a workload with different objectives such as fairness, effectiveness, efficiency and QoS. 
+This work is complimentary to our scheduler design as it deals with ordering the queries \textit{before} they enter the system, where as we focus on scheduling \textit{admitted} queries. 
+%\textit{Qshuffler}~\cite{ahmad2011interaction} is a query 
+%scheduler for report generation workloads. 
+%It clusters queries based on their interaction with each other and predicts the 
+%performance of the mix using statistical methods.
+%It does not preempt queries once they are scheduled, whereas \sys{}'s 
+%scheduler uses fine grained control over query execution, allowing query suspension and resumption. 
+
+%In business intelligence settings, workload management is an important challenge.
+%Some techniques to manage workloads are based on QoS considerations. 
+%Krompass et al.~\cite{krompass2007dynamic} identify and handle mis-behaving queries in a workload, and also propose an economic model for prioritizing and penalizing queries based on their service level agreements~\cite{krompass2006quality}.
+%Such techniques can be combined with our scheduler. 
+%For instance, our load-controller's action on a query that uses large amount of memory is to suspend it. 
+%Alternate actions could be to re-prioritize, kill, or resubmit the query, as described in~\cite{krompass2007dynamic}.
+%\sys{}'s prioritized query execution approach can be effective in  scenarios involving 
+%SLAs. 
+
+Several enterprise databases~\cite{res_gov, rm, DB2, teradatawm, gpdb, hpwm} offer
+workload management solutions which %such as admission control capabilities, 
+classify queries based on their estimated resource requirements, % (e.g. CPU, memory, I/O), 
+encode resource allocation limits as resource pools and map workloads to such resource pools. 
+While such estimation methods can be used to complement our approach, 
+our scheduler can also work without such detailed estimation techniques. 
+Prior research in this area~\cite{krompass2007dynamic, krompass2006quality} has focused on identifying misbehaving queries, prioritizing/penalizing queries to meet the service level objectives.
+Our load controller can be complemented with such functionalities.
+
+%Resource (particularly memory) management, is a crucial problem for database systems. 
+%Prior work in this area~\cite{mehta1993dynamic, davison1995dynamic} has focused on dynamic memory allocation schemes.
+%Mehta and Dewitt's~\cite{mehta1993dynamic} memory allocation scheme
+%grouped queries by their estimated memory requirements, and allocated memory to different query classes. 
+%Davison and Graefe introduced a resource brokering model~\cite{davison1995dynamic} to minimize query execution times with a constraint of fairness.
+%These techniques are complimentary to our execution engine and can also be incorporated in our buffer manager. 
+
+Predicting query performance is an active area of research. 
+Earlier work~\cite{wu2013towards, wu2014uncertainty, duggan2011performance} includes analytical models based on the optimizer's cost models for both single query and multiple concurrent queries.
+By design, our Learning Agent can incorporate such techniques, but can also function without them. 
+More accurate work order execution time estimates can further improve adherence to the policy specifications.
+%Wu et al.~\cite{wu2013towards, wu2014uncertainty} developed an analytical model using optimizer's cost model to estimate the CPU and I/O costs for individual query, and used a queueing model to estimate the execution times of concurrent queries in a workload.
+%Duggan et al.~\cite{duggan2011performance} presented a model to estimate the performance impact of running concurrent queries.
+%Our Learning Agent's prediction accuracy can benefit from such models, 
+%Despite these advances in the area of execution time estimation, using 
+%inaccurate estimates for achieving fairness may result into unfair schedules. 
+
+%There is a significant interest in minimizing workload execution time by sharing 
+%data and computations across queries.
+%QPipe~\cite{harizopoulos2005qpipe} exploits common data and operations among 
+%different queries. 
+%CJoin~\cite{candea2009scalable} operator introduced by Candea et al. continuously 
+%scans the fact table, applies predicates from different queries and routes the 
+%results to individual queries.
+%Zukowoski et al. proposed \textit{co-operative scans}~\cite{zukowski2007cooperative} 
+%to share scan operations among concurrent queries. 
+%%The sharing of scans reduces the number of I/O operations, increases the data 
+%%sharing among concurrent queries thereby improving the latency of individual 
+%%queries and the overall execution time. 
+%SharedDB~\cite{giannikis2012shareddb} creates a single global query plan for a 
+%workload to share computations across queries, thus making it suitable for high 
+%throughput demanding environments. 
+%These sharing approaches treat every query equally and it is not clear if they 
+%can respect query priorities.
+%Work and data sharing in \sys{} can be achieved by changing the way work orders are
+%created, e.g. if multiple queries need to scan the same block, a single work order can
+%be created for all of them. 
+%In practice, we create separate work orders for different queries to keep the 
+%execution simple.
+%Additionally, many database systems \reminder{Can we use examples of Postgres, 
+%Greenplum, SQL server, Oracle here?} still follow the \textit{query-at-a-time} 
+%model.
+%In such systems, our scheduler paves a way towards policy-driven execution
+%of concurrent queries. 
+
+Scheduling problem has also been studied in the OS and the networks community. 
+%Kay and Lauder~\cite{kay1988fair} described \textit{Share}, a pioneering scheduler that ensured fairness for all the system users.
+Our scheduler's probabilistic framework is inspired by the seminal lottery scheduling~\cite{lottery-scheduling} % by Waldspurger and Weihl,
+in which different processes are assigned certain number of lottery tickets,
+A lottery is conducted after every fixed time intervals and the winner process gets to execute in the next quantum. 
+
+A key difference in lottery scheduling and our work is that the OS scheduling is usually preemptive. %, meaning that a process can be preempted after it uses its time slice. 
+The OS maintains a process context that captures the state of the preempted process. 
+\sys{}'s scheduling is non-preemptive, which means once a work order begins its execution on a CPU core, it continues to do so until completion.
+Non-preemptive scheduling provides us an exemption from maintaining work order context (similar to process context), thereby simplifying the relational operator execution algorithms.
+
+%\reminder{Removed OS refs}
+%Meehan~\cite{meehean2011towards} analyzed various Linux CPU schedulers, %like O(1), CFS, and BFS. 
+%showcased the issues of black box CPU scheduling and highlighted the need for increased transparency in CPU scheduling.
+%%It achieves fairness by assigning equal proportion of time to the users and not 
+%%to the individual processes that are running on the system. 
+%%Pabla et al.~\cite{pabla2009completely} described how the Completely Fair Scheduler (CFS) strives to be fair to all the processes running in the Linux. 
+%Peter et al.~\cite{peter2010design} proposed design principles for multi-core schedulers used in general purpose OS.
+%Giceva et al.~\cite{giceva2013cod} advocated co-designing database and OS for their better integration.
+
+\sys{}'s design philosophy is to make scheduling transparent and fine-grained, and to decouple mechanism from policies~\cite{LampsonS76} - a common theme found in the OS literature.
+
+Deficit Round Robin (DRR)~\cite{shreedhar1996efficient} is a technique for network packet scheduling.
+Our usage of work order execution time as a metric is similar DRR's usage of packet sizes. 
+However DRR scheduling is inherently round robin based (with additional maintenance of quantum information), where as our scheduling is based on dynamic probabilities. 
+
+Our scheduler is designed for an in-memory analytical database system. 
+There are several such systems such as MonetDB~\cite{monetdb}, Spark SQL~\cite{spark-sql}.
+%\reminder{Removed cluster scheduling refs}
+%Cluster scheduling has received a wide attention recently.
+%Isard et al.~\cite{isard2009quincy} encoded the problem of scheduling jobs on compute nodes in the cluster as a graph that captures the data-locality and fairness requirements of the jobs. 
+%\textit{Tetris}~\cite{grandl2014multi} is a multi-resource cluster scheduler that packs tasks to machines based on their demands for different resources. 
+%This paper focuses on a single node setting, however, such ideas may be interesting to purse in the distributed version of \sys{}, which is part of future work.
+%In cluster scheduling, resource demands of tasks are usually well understood. 
+%Therefore variations in the duration of task executions can be statically modelled 
+%- e.g. changing the site of task execution, time for input data movement across 
+%network, etc. 
+%In contrast, predicting cardinality and time estimates in database systems is 
+%still an active research area, therefore accurately modeling the entire query 
+%execution before scheduling the query may be difficult.

@@ -1,0 +1,24 @@
+% !TEX root = scheduler.tex
+\section{Background}\label{sec:background}
+In this section we establish some prerequisites for the proposed Quickstep scheduler framework.
+\sys{}~\cite{quickstep} is an open-source relational database engine 
+% and SQL as its query language.  \sys{} 
+designed to efficiently leverage contemporary hardware aspects such as large main memory, multi-core, and multi-socket server settings. 
+%The system aims to deliver high performance in read-mostly data warehousing 
+%environments.  
+%While \sys{} targets environments in which datasets are mostly memory resident, it can also answer queries on datasets that do not fit in memory, as all the data are accessed via a buffer pool, that supports page evictions and replacements. 
+% However,  the implementation of \sys{} largely targets settings in which the  entire 
+%database fits in memory.
+
+The control flow associated with query execution in \sys{} involves first parsing the query, and then optimizing the query using a cost-based query optimizer.
+The optimized query plan is represented as a Directed Acyclic Graph (DAG) of relational operator primitives. 
+%Currently, the system employs hash-based implementation for join and aggregate operators. 
+The query plan DAG is then sent to a \textit{scheduler}, which is the focus of this paper. 
+The scheduler runs as a separate thread and coordinates the execution of all queries. 
+Apart from the scheduler, \sys{} has a pool of worker threads that carry out computations on the data. 
+
+\sys{} uses a query execution paradigm (built using previously proposed approaches~\cite{qsstorage,morsel}), in which a query is executed as a sequence of \textit{work orders}. 
+A work order operates on a data block, which is treated as a self-contained mini-database~\cite{qsstorage}.  (c.f.~\cite{supplement} for examples of work orders)
+The computation that is required for each operator in a query plan is decomposed into a sequence of work orders. 
+For example, a select operator produces as many work orders as there are blocks in the input table. 
+\sys{}'s work order abstraction is tied with its storage management, which we describe in~\cite{supplement}.

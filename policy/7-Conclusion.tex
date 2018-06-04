@@ -1,0 +1,9 @@
+% !TEX root = scheduler.tex
+\section{Conclusions and Future Work}\label{sec:conclusion}
+%Query scheduling is an important problem and its importance is growing with the emerging trends in cloud databases.
+We present a scheduler framework built on the principle of separation of policy and mechanism. 
+It supports a wide-range of policies, even in dynamic workload settings and without requiring complex and accurate estimates from a query optimizer. 
+The proposed framework is holistic as it also incorporates a load control mechanism. 
+We have implemented our methods in an open-source in-memory database \sys{}, and also demonstrated the effectiveness of our approach.
+%interesting properties such as resource allocation using fair and priority-based policies and in-built load control mechanisms. We demonstrate the effectiveness of the scheduler in enforcing the above policies with the SSB workload with uniform and skewed dataset. Our fine-grained task scheduling paradigm allows the scheduler to be reactive to unexpected situations such as arrival of a new high-priority query or sudden burst in resource demands.
+There are many directions for future work, including extending the scheduler framework to the distributed version of \sys{}. %, and allowing more kinds of resources such as disk I/O and network and exploring more estimation techniques for our Learning Agent. 

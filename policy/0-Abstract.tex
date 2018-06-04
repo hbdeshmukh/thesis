@@ -1,0 +1,12 @@
+% !TEX root = scheduler.tex
+\begin{abstract}
+There is a growing need for in-memory database analytic services, especially in cloud settings. Concurrent query execution is common in such environments. 
+A crucial deployment requirement is to employ a concurrent query execution scheduling framework that is flexible, precise, and adaptive to meet specified deployment goals. 
+In addition, the framework must also aim to use all the underlying hardware resources effectively (for high performance and high cost efficiency). 
+This paper focuses on the design and evaluation of such a scheduler framework. 
+Our scheduler framework incorporates a design in which the scheduling policies are cleanly separated from the scheduling mechanisms, allowing the scheduler to support a variety of policies, such as fair and priority scheduling. 
+The scheduler also contains a novel learning component to monitor and quickly adapt to changing resource requirements of concurrent queries. 
+In addition, the scheduler easily incorporates a load controller to protect the system from thrashing in situations when resources are scarce/oversubscribed. 
+We have implemented our scheduling framework in an in-memory database engine, and using this implementation we also demonstrate the effectiveness of our approach. 
+Collectively, we present the design and implementation of a scheduling framework for in-memory database services on contemporary hardware in modern deployment settings.
+\end{abstract}

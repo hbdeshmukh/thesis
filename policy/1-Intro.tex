@@ -1,0 +1,84 @@
+% !TEX root = scheduler.tex
+\section{Introduction}\label{sec:intro}
+Concurrent queries are common in various settings, such as application stacks that issue multiple queries simultaneously and multi-tenant database-as-a-service environments~\cite{NarasayyaMSLSC15, NarasayyaDSCC13}.
+%Scheduling concurrent queries is a classical problem in database systems, which involves co-ordinating their executions, while also managing the resources used for execution. 
+There are several challenges associated with scheduling  concurrent execution of queries in such environments.
+
+The first challenge is related to exploiting the large amount of hardware parallelism that is available inside modern servers, as it requires dealing with two key types of parallelism.
+%efficiently utilizing the .  % considering the availability of large number of CPU cores. 
+The first type is \textit{intra-query parallelism}. 
+Modern database systems often use query execution methods that have a high intra-query parallelism~\cite{qsstorage,morsel,wang2016elastic}.
+Concurrent query execution adds another layer of parallelism, i.e. \textit{inter-query parallelism}. 
+%Modern servers offer lot of parallelism in terms of CPU cores. 
+%Allocation of CPU resources to various tasks is a big challenge in this context. 
+
+The second challenge is that workloads are often dynamic in nature. 
+%Queries exhibit different characteristics in terms of their resource consumption behaviors and their arrival time is unpredictable.
+For each query, its resource (e.g. CPU and memory) demands can vary over the life-span of the query. 
+Furthermore, different queries can arrive and depart at any time. % points during the workload execution. 
+Maintaining a  level of Quality of Service (QoS) with dynamic workloads is an important challenge for the database cloud vendor. 
+
+%Query scheduler is key to the functioning of a database system, as it impacts factors such as performance, resource management and quality of service. 
+
+To address these issues, we present a concurrent query execution scheduling framework for analytic in-memory database systems. 
+%Formulating the design principles of the query scheduler requires understanding of its goals.
+We cast the goals for the scheduler framework by relating it to a governance model, since
+the framework \textit{governs} the use of resources for executing queries in the system. 
+Next, we describe some goals for a governance model and translate them in the context of our framework.  
+
+First, an ideal governance model should be \textit{transparent}, i.e. decisions should be taken based on the guiding principles and they should be clearly understandable.
+In the context of scheduling, we can interpret this goal as requiring high level \textit{policies} that can govern the resource allocation among concurrent queries. 
+This goal also highlights the need to \textit{separate mechanisms and policies}, a well-known system design principle~\cite{LampsonS76}.
+The scheduler needs to provide an easy way to specify a variety of policies (e.g. priority-based or equal/fair allocation) that can be implemented with the underlying mechanisms.
+%Such flexibility is cruicial for the database to be deployed in various scenarios. 
+Ideally, the scheduler should adhere to the policy even if the query plan that it has been given has poor estimates for resource consumption.
+
+Second, the governance model should be \textit{responsive} to dynamic situations. 
+Thus, the scheduler must be reactive and auto-magically deal with changing conditions; e.g., the arrival of a high-priority query or an existing query taking far more resources than expected. 
+A related goal for the scheduler is to \textit{control} and \textit{predictably deal} with resource thrashing.
+
+Finally, the governance should be \textit{efficient} and \textit{effective}. 
+Thus, the scheduler must work with the data processing kernels in the system to use the hardware resources effectively to realize high cost efficiency and high performance from the underlying deployment. 
+In main-memory database deployments (the focused setting for this paper), one aspect of effective resource utilization requires using all the processing cores in the underlying server effectively. 
+
+%We begin by listing a desired set of properties for a contemporary database scheduler. 
+%First, the scheduler needs to provide an easy way to specify a variety of policies (e.g. priority-based or equal/fair allocation) to distribute the system resources among concurrent queries. 
+%Such flexibility is required to allow the database service to be deployed in various scenarios. 
+%Second, the scheduler must be reactive so that it can auto-magically deal with changing conditions (e.g. the arrival of a high-priority query or an existing query taking far more resources than expected). 
+%Ideally the scheduler should be able to meet the policy goals even if the query plan that it has been given has poor estimates about projected resource consumption. 
+%Third, the scheduler should have in-built mechanisms to deal with resource thrashing in a controlled and predictable way. 
+%Finally, the scheduler must work with the data processing methods in the system to use all the hardware resources effectively to realize high cost efficiency and high performance from the deployment. 
+%In main-memory database deployments, which is the focus of this paper, one aspect of effective resource utilization requires using all the processing cores in the underlying server box effectively. 
+%
+\textbf{Contributions:} We present the design of a scheduler framework that meets the above goals. 
+We have implemented our scheduler framework in an open-source, in-memory database system, called \sys{}~\cite{quickstep}.
+%The background of \sys{}, essential for understanding the scheduler design is presented
+%in Section~\ref{sec:background}.
+A distinguishing aspect of this paper compared to previous work
+%from the related work (described in Section~\ref{sec:related}) 
+is that we present a holistic scheduling framework to deal with both intra and inter query parallelism in a single scheduling algorithm. 
+%and a clean separation of policy from mechanism allowing for the system to easily support a wide variety of policies. 
+%as against a single scheduling algorithm. The framework is based on a query execution paradigm that uses smaller individual sub-tasks, which is found in many systems~\cite{morsel,wang2016elastic}.
+Therefore, our framework is far more comprehensive and more broadly applicable than previous work.
+
+Our framework employs a design that cleanly separates policies from mechanism. 
+This design allows the scheduler to easily support a range of different policies, and enables the system to effectively use the underlying hardware resources. 
+The clean separation also makes the system maintainable over time, and for the system to easily incorporate new policies. 
+Thus, the system is \textit{extensible}. 
+The key underlying unifying mechanism is a probability-based framework that continuously determines resource allocation among concurrent queries.
+Our evaluation (see Section~\ref{sec:eval}) demonstrates that the scheduler can allocate resources precisely as per the policy specifications. 
+
+The framework uses a novel learning module that learns about the resources consumed by concurrent queries, and uses a prediction model to predict future resource demands for \textit{each} active query. 
+Thus, the scheduler does not require accurate predictions about resource consumption for each stage of each query from the query optimizer (though accurate predictions are welcome as they provide a better starting point to the learning component). 
+The predictions from the learning module can then be used to react to changing workload and/or environment conditions to allow the scheduler to realize the desired policy. 
+Our evaluations underline the crucial impact of the learning module in the enforcement of policies.
+The scheduler has a built in load controller to automatically suspend and resume queries if there is a danger of thrashing.
+
+Collectively, we present an end-to-end solution for managing concurrent query execution in complex modern in-memory database deployment environments.
+
+The remainder of this paper is organized as follows: Section~\ref{sec:background} describes some preliminaries related to \sys{}. 
+The architecture of the scheduler framework is described in Section~\ref{sec:design}. 
+Section~\ref{sec:policy} describes the  formulation of the policies and the load control mechanisms.
+Section~\ref{sec:eval} contains the experimental results. Related work is discussed in Section~\ref{sec:related}, and Section~\ref{sec:conclusion} contains our concluding remarks.
+
+%\reminder{Removed a bunch of references, but hopefully these show up in the related work. We shouldn't loose the references or the discussion around them. It just didn't make sense to keep it in the new intro.}

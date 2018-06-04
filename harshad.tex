@@ -58,7 +58,8 @@
 % note: run "make clean" if swtiching from hyperref to non-hyperref, and
 % vice versa, as they use different TOC file markups.
 
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\sys}{Quickstep}
 % 
 % \definecolor{links}{rgb}{0.5,0,0} 
 % \definecolor{cites}{rgb}{0,0.5,0} 
@@ -111,6 +112,7 @@
 %=======================================================================
 % Chapter tex files
 \include{system/quickstep}
+\include{policy/scheduler}
 %\include{intro/intro2}
 %\include{background/background1}
 %\include{synfinder/synfinder1}
