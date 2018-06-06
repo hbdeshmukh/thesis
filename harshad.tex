@@ -43,6 +43,10 @@
 \usepackage{epsfig,amsfonts}
 \usepackage{amsthm}
 \usepackage{enumerate}
+% Font selection: Reference http://www.khirevich.com/latex/font/
+\usepackage[T1]{fontenc}
+\usepackage{charter}
+\usepackage[expert]{mathdesign}
 
 %% Chaitanya
 \usepackage{pbox}
@@ -54,6 +58,8 @@
 \usepackage{pifont}
 \usepackage{array}
 
+% Fixes bibliography bug.
+\def\newblock{\hskip .11em plus .33em minus .07em}
 % "hyperref" package for making section/citation references hyperlinks
 % note: run "make clean" if swtiching from hyperref to non-hyperref, and
 % vice versa, as they use different TOC file markups.
@@ -126,11 +132,11 @@
 %=======================================================================
 % Bibliograph
 %\bibliographystyle{plainnat}
-%\bibliographystyle{abbrv}
-%\addcontentsline{toc}{chapter}{Bibliography}
-%\begin{singlespace}
-%\bibliography{thesis}            % Make the bibliography
-%\end{singlespace}
+\bibliographystyle{abbrv}
+\addcontentsline{toc}{chapter}{Bibliography}
+\begin{singlespace}
+\bibliography{thesis}            % Make the bibliography
+\end{singlespace}
 
 %=======================================================================
 % Appendices
@@ -141,9 +147,9 @@
 
 %=======================================================================
 % Index
-%\begin{singlespace}
-%\printindex
-%\end{singlespace}
+\begin{singlespace}
+\printindex
+\end{singlespace}
 
 %\include{vita}                  % Optional Vita, use \begin{vita} vita text \end{vita}
 \end{document}
