@@ -16,9 +16,9 @@ execution skew.
 We use an instance from the Cloudlab~\cite{RicciEide:login14} platform for our evaluation,
 which we described in Table~\ref{table:hardware}.
 
-\begin{table}[]
+\begin{table}[bht]
 \centering
-\begin{tabular}{|p{1cm}|p{6.9cm}|}
+\begin{tabular}{|p{3cm}|p{10cm}|}
 \hline
 \textbf{Parameter} & \textbf{Description} \\ \hline
 Processor & 2 Intel Xeon Intel E5-2660 2.60 GHz (Haswell EP) processors\\ \hline
@@ -270,7 +270,6 @@ Note that the scheduler learns the phase changes quickly, and adjusts its estima
 
 \begin{figure}[t]
 	\centering
-	\label{fig:pred-vs-observed-time-per-wo}
     \begin{subfigure}[b]{0.3\textwidth}
     	\includegraphics[width=\textwidth]{policy/figures/q11-q41-prediction-accuracy-skew-data.pdf}
 	\caption{Skewed dataset}    	
@@ -280,6 +279,8 @@ Note that the scheduler learns the phase changes quickly, and adjusts its estima
     	\includegraphics[width=\textwidth]{policy/figures/q11-q41-prediction-accuracy-uniform-data.pdf}
 	\caption{Uniform dataset}    	    	
     \end{subfigure}%	
+	\caption{Comparison of predicted and observed time per work order}
+	\label{fig:pred-vs-observed-time-per-wo}    
 \end{figure}
 
 \subsection{Load Controller}
