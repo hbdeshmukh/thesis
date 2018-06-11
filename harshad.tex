@@ -58,6 +58,9 @@
 \usepackage{pifont}
 \usepackage{array}
 
+\newcommand{\todo}[1]{}
+\renewcommand{\todo}[1]{{\color{red} TODO: {#1}}}
+
 % Fixes bibliography bug.
 \def\newblock{\hskip .11em plus .33em minus .07em}
 % "hyperref" package for making section/citation references hyperlinks
@@ -117,6 +120,7 @@
 
 %=======================================================================
 % Chapter tex files
+\include{intro/introduction}
 \include{system/quickstep}
 \include{policy/scheduler}
 %\include{intro/intro2}
