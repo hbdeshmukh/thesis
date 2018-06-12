@@ -1,16 +1,28 @@
 \chapter{Introduction}
-Scheduling is a fundamental problem in computer systems, and physical systems. 
-Systems use resources and often times these reources are finite and scarce. 
-Scheduling facilitates the systems to use limited resources and share them with the users of the system.
-Two examples of such systems are operating systems and database systems. 
-Both systems use resources such as CPU, memory and disk.
+%\paragraph{Scheduling on a high level}
+Computer systems use resources to function. 
+Often times these reources are finite and scarce. 
+Scheduling can be viewed as a governance model that \textit{governs} how the resources are shared among users and how various parts of the system function together. 
+The governance model is designed so as to meet goals about resource management and performance of the system. 
+As an example, an operating system uses resources such as memory, CPUs, and disk.
+It allows multiple processes to use these resources at the same time. 
 
+%\paragraph{Scheduling's history}
 Scheduling is a well studied problem both from theoretical and practical perspectives. 
-Typicallt a scheduling problems is tasked with an objective and with a goal to find a schedule that can either meet the objective or get close to it.
+Typically a scheduling problems is tasked with an objective and with a goal to find a schedule that can either meet the objective or get close to it.
 \todo{For example, job scheduling with deadline}.
 Many scheduling problems are difficult to solve (NP hard).
-Prior work has proposed heuristics or greedy approaches to find solutions to scheduling problems. 
+Prior work uses a variety of techniques to solve scheduling problems such as heuristics, dynamic programming or greedy approaches. 
 
-In this dissertation, we present scheduling for executing queries in a database system.
+%\paragraph{Scheduling for databases}
+In this dissertation, we study the problem of scheduling for modern database systems.
+We distinguish the traditional database systems and modern database systems based on two aspects: resource and data volumes.
+
+Modern database systems are built for modern hardware, which includes large main memories, Non-Uniform Memory Access (NUMA) patterns and large number of CPU cores.
+Traditional database architecture is built for the disk based era, when memories were smaller, data were mostly resident on disks and multi-core parallelism was uncommon. 
+The distinction between traditional database architecture and modern database architecture is important from the resource landscape perspective. 
+As scheduling is closely coupled to resource management, we pay attention to modern database design and 
+
+
 
 
