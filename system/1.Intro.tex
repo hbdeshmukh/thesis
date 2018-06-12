@@ -4,14 +4,14 @@
 \section{Introduction}
 Query processing systems today face a host of challenges that were not as prominent just a few years ago. A key change has been dramatic changes in the hardware landscape that is driven by the need to consider energy as a first-class (hardware) design parameter. Across the entire processor-IO hierarchy, the hardware paradigm today looks very different than it did just a few years ago. Consequently, we are now experiencing a growing \textit{deficit} between the pace of hardware performance improvements and the pace that is demanded of data processing kernels to keep up with the growth in data volumes.
 
-\begin{figure}
-\centering
-   \includegraphics[width=\columnwidth]{system/figures/deficit.pdf}
-   \vspace*{-2em}
-   \caption{\textbf{Processor performance improvement as measured by the highest reported CINT2006 benchmark result for Intel Xeon chips from~\cite{cpu2006} compared to the number of pages indexed by Google (using estimates made by~\cite{google-pages-db}). The figure does not show the increase in the number of queries (which is about 2.5X for Google search queries from 2011--14), and the increase in the complexity of queries as applications request richer analytics. These aspects make the deficit problem worse. The figure also shows the maximum number of cores per chip used in reported CINT2006 results over time. Interestingly (and not shown in the figure), both the minimum and the average amount of memory per chip in the reported CINT2006 results has grown by $\approx$4X from 2011 to 2017.}}
-   % For example, the number of Google search queries has gone up by a factor of 6X in the time period shown in the graph above.}
-   \label{fig-deficit}
-\end{figure}
+%\begin{figure}
+%\centering
+%   \includegraphics[width=\columnwidth]{system/figures/deficit.pdf}
+%   \vspace*{-2em}
+%   \caption{\textbf{Processor performance improvement as measured by the highest reported CINT2006 benchmark result for Intel Xeon chips from~\cite{cpu2006} compared to the number of pages indexed by Google (using estimates made by~\cite{google-pages-db}). The figure does not show the increase in the number of queries (which is about 2.5X for Google search queries from 2011--14), and the increase in the complexity of queries as applications request richer analytics. These aspects make the deficit problem worse. The figure also shows the maximum number of cores per chip used in reported CINT2006 results over time. Interestingly (and not shown in the figure), both the minimum and the average amount of memory per chip in the reported CINT2006 results has grown by $\approx$4X from 2011 to 2017.}}
+%   % For example, the number of Google search queries has gone up by a factor of 6X in the time period shown in the graph above.}
+%   \label{fig-deficit}
+%\end{figure}
 
 Figure~\ref{fig-deficit} illustrates this deficit issue by comparing improvements in processor performance (blue line) with the growth rate of data (green line), using the number of pages indexed by Google as an illustrative example. This data growth rate is conservative for many organizations, which tend to see a far higher rate of increase in the data volume; for example, Facebook's warehouse grew by 3X in 2014~\cite{fb-growth-14}. This figure also shows (using a dotted orange line with squares) the growth in the number of cores per processor over time. As one can observe, the number of cores per processor is rising rapidly. % as multi-core parallelism is critical for processor vendors.
 %to realizing overall higher processor performance.
