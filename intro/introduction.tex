@@ -1,35 +1,37 @@
 \chapter{Introduction}
 %\paragraph{Scheduling on a high level}
 Computer systems need resources to function. 
-Often times these reources are finite and scarce. 
+Usually the availability of such resources is limited and the system has to share these resources among multiple users. 
 Scheduling can be viewed as a governance model that \textit{governs} how the resources are shared among users and how various parts of the system function together. 
 The governance model is designed so as to meet goals about resource management and performance of the system. 
 As an example, an operating system uses resources such as memory, CPUs, and disk.
 It allows multiple processes to use these resources at the same time. 
 
 %\paragraph{Scheduling's history}
-Scheduling is a well studied problem both from theoretical and practical perspectives. 
-Typically a scheduling problems is tasked with an objective and with a goal to find a schedule that can either meet the objective or get close to it.
+Scheduling is a well studied problem, both from theoretical and practical perspectives. 
+Typically a scheduling problems involves finding a schedule with a certain objective.
+The desired solution is the one that either meets the objective or gets close to it.
 Many scheduling problems are difficult to solve (NP hard).
 \todo{For example, job scheduling with deadline}.
 There are a variety of techniques to solve scheduling problems such as heuristics, dynamic programming or greedy algorithms. 
 
 %\paragraph{Scheduling for databases}
 In this dissertation, we study the problem of scheduling for modern database systems.
+Before understanding the scheduling problem itself, we first understand what makes the modern database systems \textit{modern}.
 We distinguish traditional database systems and modern database systems based on three aspects which are closely related to the scheduling problem: modern hardware, data volumes, and deployment environments.
 We discuss these aspects below and explain how they are related to the scheduling problem. 
 
-Over the past few years hardware has steadily evolved. 
+Over the past few years hardware has drastically evolved. 
 Modern hardware includes large main memories, Non-Uniform Memory Access (NUMA) patterns and large number of CPU cores.
 %To leverage the capabilities of the modern hardware comprehensively, database architecture needs a fundamental shift from its traditional roots. 
 Traditional database architecture comes from a time when memories were smaller, data were mostly resident on disks and multi-core parallelism was uncommon. 
 Therefore in contrast to traditional databases, modern databases have two resources in abundance: CPU parallelism and memory.
-Scheduling involves managing resources, therefore there is a place for schedulers in modern database architecture. 
+Scheduling involves managing resources, therefore we believe that there is a place for schedulers in modern database architecture. 
 
-Next we look at data volume aspect.
-Big data means that we are generating tremendous amount of data.
-To process the large amount of data efficiently, data processing engines have to leverage all the hardware features effectively. 
-However, we are experiencing a growing \textit{deficit} between the pace of hardware performance improvements and the pace that is demanded of data processing kernels to keep up with the growth in data volumes.
+Next we look at the data volume aspect.
+We are in the era of big data and witnessing tremendous amount of data being generated.
+To process the large amount of data efficiently, data processing engines have to effectively leverage all the hardware features. 
+However, what we are experiencing is a growing \textit{deficit} between the pace of hardware performance improvements and the pace that is demanded of data processing kernels to keep up with the growth in data volumes.
 
 \begin{figure}
 	\centering
@@ -47,13 +49,20 @@ Figure~\ref{fig-deficit} illustrates this deficit issue by comparing improvement
 %Thus, there is a critical need for systems that can exploit the full potential of the hardware parallelism that is available in each box.
 In addition, %as noted in the caption of the figure,
 since 2011 the main memory sizes are also growing rapidly, and there is an increasing shift to larger main memory configurations. Thus, there is a critical need for in-memory data processing methods that \textit{scale-up} to exploit the full (parallel) processing power that is locked in commodity multi-core servers today.
-\todo{Explain how growing data volume relates with scheduling}
+\todo{Explain how growing data volume relates to scheduling.}
 
 Third, we look at deployment environments. 
-The most common deployment method few years ago was "on-premise database", which means an enterprise would host the database software on a local machine(s) . 
-Today cloud databases have changed how databases are deployed.
-Cloud providers host and manage databases on their cloud platforms. 
-The cloud provider takes care of concerns such as elasticity, fault tolerance, and replication.
+The most common deployment method few years ago was "on-premise database", which means an enterprise would host and maintain the database software on local servers. 
+All the deployment related concerns such as failover handling, installing additional capacity, upgrading hardware would be taken care by the in-house database administrator. 
+Today cloud databases have drastically changed how databases are deployed.
+Cloud providers host and manage databases on their cloud platforms and abstract away all the deployment pain points from the users.
 The database engine may be hosted on a number of hardware platforms or virtualized environments in the cloud.
-Irrespective of the host environment, the database is still expected to offer the best performance and meet the Service Layer Objectives (SLO) promised to the client of the database service. 
-\todo{Explain how cloud databases relates with scheduling}
+
+Cloud database is still expected to offer the best performance and meet the Service Layer Objectives (SLO) promised to the client of the database service. 
+To meet the SLO database service, the database service may suddenly need to elastically add more nodes. Sometimes to reduce operational expenses, the database service may need to downsize the number of operational nodes.
+
+Some cloud databases provide differentiated service guarantees to users based on their importance levels. 
+To guarantee the SLO for all users, the database service may require to reshuffle resources from less important customers to more important customers. 
+
+In summary, the resource management layer of the cloud database needs to be flexible enough to withstand dynamicity in the resource availability.
+Hence the scheduler should have built in resource allocation flexibility, helping the resource management of the database become dynamic.
