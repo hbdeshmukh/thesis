@@ -17,6 +17,7 @@ Some of the standard techniques used to solve scheduling problems are: using dom
 
 %\paragraph{Scheduling for databases}
 In this dissertation, we study the problem of scheduling for modern database systems.
+\todo{Add an executive summary for the thesis}
 Before understanding the scheduling problem itself, we first understand what makes the modern database systems \textit{modern}.
 
 \section{Modern Database Systems and the need for Scheduling}
@@ -79,20 +80,30 @@ Hence the scheduler should have built in resource allocation flexibility, helpin
 Next we take a deeper look into the scheduling problem in database systems.
 The scope of our work is relational analytics (warehouse settings) where data primarily resides in memory. 
 In relational analytics, questions on data are posed via \textit{queries}, that are made up of relational operators. 
-We focus on two desirable aspects of scheduling in database systems: a) An abstraction for tasks b) Connecting resouce management with relational operators' semantics.
+To get an idea of the problem of scheduling in database systems, we compare traditional database systems with MapReduce~\cite{mapreduce} based systems such as Hive~\cite{thusoo2010hive} in the next section.
 
 \section{Scheduling: Databases and MapReduce}
-To get a good idea of the problem of scheduling in database systems, we compare traditional database systems with MapReduce~\cite{mapreduce} based systems such as Hive~\cite{thusoo2010hive}.
+We focus on two aspects of scheduling to compare databases and MapReduce frameworks: a) an abstraction for tasks b) connecting resource management with relational operators' semantics.
+
 MapReduce is a parallel data processing framework where a job is broken up in several parallel map and reduce tasks. 
 As MapReduce programs only consist of map tasks and reduce tasks, there is a natural ease to scheduling such programs.
 The mappers and reducer tasks form the scheduling abstractions for the MapReduce framework.
 
-In the database world, a query is made up of several relational operators such as selection, join, aggregation. 
+In databases, a query is made up of several relational operators such as selection, join, aggregation. 
 Each logical operator may have corresponding many physical operators. 
-For example an equi join operator can be performed using hash-join and sort-merge join.
-Given the variety in terms of relational operators and their physical implementations, the database world did not have a common scheduling abstraction for tasks within a query. 
+For example an equi-join operator can be performed using hash-join and sort-merge join.
+Given the variety in terms of relational operators and their physical implementations, databases did not have a common scheduling abstraction for tasks within a query. 
+The lack of a common scheduling abstraction could be a reason why schedulers are not considered a first class citizen in database architecture.
 
-By having a scheduling abstraction the database system can have a greater control over how resources are managed, and alloted to its users.
+By having a scheduling abstraction the database system can have a greater control over how resources are managed, and allotted to its users.in
 It makes it easy to estimate resource availability.
 If the scheduling abstraction is amenable to parallelism, it also helps the system to leverage parallelism offered by the hardware. 
 
+Next we discuss specialized resource management for relational operators. 
+Database community has for long focused on finding specialized resource management techniques to improve performance of either individual relational operators or query as a whole~\cite{davison1995dynamic, Bouganim:1998:MSL:288627.288646, memory-hash-ibm, mehta1993dynamic, DBLP:conf/cikm/NagD98}.
+Such a specialization is difficult to achieve in MapReduce framework, in which every task is either a mapper or a reducer.
+It is difficult to reason about what is the logical task being performed through the mappers and reducers. 
+For example a mapper could belong to the probe phase of a join or aggregation operator. 
+
+Through our work, we would like to achieve the best of both (databases and MapReduce framework) worlds.
+We want scheduler as a first class primitive in the database architecture and the ability to perform operator centric resource management in query execution. 
