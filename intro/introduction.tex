@@ -8,27 +8,28 @@ As an example, an operating system uses resources such as memory, CPUs, and disk
 It allows multiple processes to use these resources at the same time. 
 
 %\paragraph{Scheduling's history}
-Scheduling is a well studied problem, both from theoretical and practical perspectives. 
+Scheduling has been studied extensively in many communities including computer science theory, computer systems, and industrial systems. 
 Typically a scheduling problems involves finding a schedule with a certain objective.
 The desired solution is the one that either meets the objective or gets close to it.
-Many scheduling problems are difficult to solve (NP hard).
-\todo{For example, job scheduling with deadline}.
-There are a variety of techniques to solve scheduling problems such as heuristics, dynamic programming or greedy algorithms. 
+Many scheduling problems are difficult in nature.
+For example, the problem of scheduling $N$ jobs each with a unit execution time on $k$ processors such that the makespan of the schedule is minimized is NP complete~\cite{ULLMAN1975384}.
+Some of the standard techniques used to solve scheduling problems are: using domain specific heuristics, dynamic programming, greedy algorithms, and approximation algorithms. 
 
 %\paragraph{Scheduling for databases}
 In this dissertation, we study the problem of scheduling for modern database systems.
 Before understanding the scheduling problem itself, we first understand what makes the modern database systems \textit{modern}.
-We distinguish traditional database systems and modern database systems based on three aspects which are closely related to the scheduling problem: modern hardware, data volumes, and deployment environments.
-We discuss these aspects below and explain how they are related to the scheduling problem. 
 
+\section{Modern Database Systems and the need for Scheduling}
+We distinguish traditional database systems and modern database systems based on three aspects which are closely related to the scheduling problem: modern hardware, growing data volumes, and deployment environments.
+We discuss these aspects below and explain how they are related to the scheduling problem. 
+\paragraph{Modern hardware:} 
 Over the past few years hardware has drastically evolved. 
 Modern hardware includes large main memories, Non-Uniform Memory Access (NUMA) patterns and large number of CPU cores.
 %To leverage the capabilities of the modern hardware comprehensively, database architecture needs a fundamental shift from its traditional roots. 
 Traditional database architecture comes from a time when memories were smaller, data were mostly resident on disks and multi-core parallelism was uncommon. 
-Therefore in contrast to traditional databases, modern databases have two resources in abundance: CPU parallelism and memory.
+Therefore modern hardware have high availability of two resources as compared to their traditional counterparts: CPU parallelism and memory.
 Scheduling involves managing resources, therefore we believe that there is a place for schedulers in modern database architecture. 
-
-Next we look at the data volume aspect.
+\paragraph{Growing data volumes:}
 We are in the era of big data and witnessing tremendous amount of data being generated.
 To process the large amount of data efficiently, data processing engines have to effectively leverage all the hardware features. 
 However, what we are experiencing is a growing \textit{deficit} between the pace of hardware performance improvements and the pace that is demanded of data processing kernels to keep up with the growth in data volumes.
@@ -42,16 +43,22 @@ However, what we are experiencing is a growing \textit{deficit} between the pace
 	\label{fig-deficit}
 \end{figure}
 
-Figure~\ref{fig-deficit} illustrates this deficit issue by comparing improvements in processor performance (blue line) with the growth rate of data (green line), using the number of pages indexed by Google as an illustrative example. This data growth rate is conservative for many organizations, which tend to see a far higher rate of increase in the data volume; for example, Facebook's warehouse grew by 3X in 2014~\cite{fb-growth-14}. This figure also shows (using a dotted orange line with squares) the growth in the number of cores per processor over time. As one can observe, the number of cores per processor is rising rapidly. % as multi-core parallelism is critical for processor vendors.
+Figure~\ref{fig-deficit} illustrates this deficit issue by comparing improvements in processor performance (blue line) with the growth rate of data (green line), using the number of pages indexed by Google as an illustrative example. 
+This data growth rate is conservative for many organizations, which tend to see a far higher rate of increase in the data volume; for example, Facebook's warehouse grew by 3X in 2014~\cite{fb-growth-14}. 
+This figure also shows (using a dotted orange line with squares) the growth in the number of cores per processor over time. 
+As one can observe, the number of cores per processor is rising rapidly. % as multi-core parallelism is critical for processor vendors.
 %to realizing overall higher processor performance.
 %(While we do not consider this further in this paper, the number of cores per processing unit is even higher for non-traditional processors/co-processors.)
 % Thus, the demands on query processing can't simply be met by only throwing more chips/processors at the problem.
 %Thus, there is a critical need for systems that can exploit the full potential of the hardware parallelism that is available in each box.
 In addition, %as noted in the caption of the figure,
-since 2011 the main memory sizes are also growing rapidly, and there is an increasing shift to larger main memory configurations. Thus, there is a critical need for in-memory data processing methods that \textit{scale-up} to exploit the full (parallel) processing power that is locked in commodity multi-core servers today.
-\todo{Explain how growing data volume relates to scheduling.}
+since 2011 the main memory sizes are also growing rapidly, and there is an increasing shift to larger main memory configurations. 
 
-Third, we look at deployment environments. 
+In addition to the data growth, there is a growing interest in finding more insights from the data as quickly as possible.
+In addition to the traditional online analytical processing (OLAP), there is an increased interest in advanced analytics~\cite{DBLP:conf/sigmod/Kumar0017} which involves machine learning algorithms, both from academic community as well as industry. 
+Thus, there is a critical need for in-memory data processing methods that \textit{scale-up} to exploit the full (parallel) processing power that is locked in commodity multi-core servers today.
+
+\paragraph{Deployment environments:} 
 The most common deployment method few years ago was "on-premise database", which means an enterprise would host and maintain the database software on local servers. 
 All the deployment related concerns such as failover handling, installing additional capacity, upgrading hardware would be taken care by the in-house database administrator. 
 Today cloud databases have drastically changed how databases are deployed.
@@ -59,7 +66,7 @@ Cloud providers host and manage databases on their cloud platforms and abstract 
 The database engine may be hosted on a number of hardware platforms or virtualized environments in the cloud.
 
 Cloud database is still expected to offer the best performance and meet the Service Layer Objectives (SLO) promised to the client of the database service. 
-To meet the SLO database service, the database service may suddenly need to elastically add more nodes. Sometimes to reduce operational expenses, the database service may need to downsize the number of operational nodes.
+To meet the SLO, the database service may suddenly need to elastically add more nodes. Sometimes to reduce operational expenses and to lower the energy consumption, the database service may need to downsize the number of operational nodes.
 
 Some cloud databases provide differentiated service guarantees to users based on their importance levels. 
 To guarantee the SLO for all users, the database service may require to reshuffle resources from less important customers to more important customers. 
