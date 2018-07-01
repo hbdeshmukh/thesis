@@ -116,7 +116,28 @@ We want scheduler as a first class primitive in the database architecture and th
 We now present the contributions of this dissertation. 
 
 \paragraph{Design and Implementation of the Quickstep Database System:}
+We present the design and implementation of the Quickstep database system. 
+Quickstep targets high speed in-memory relational analytics. 
+We describe the various components of the system including storage manager, query optimizer, query execution engine (which consists the query scheduler), and the expression evaluation module. 
+Through benchmarking against other systems, we show that Quickstep is faster than other systems.
 
 \paragraph{Design and Implementation of the Quickstep Scheduler:}
+The core focus of this dissertation is Quickstep's query scheduler. 
+We describe the \textbf{nuts and bolts} of the scheduler.
+We propose a novel task abstraction called \textit{work orders} used for query processing in Quickstep.
+The abstraction is used by all the relational operators implemented in Quickstep.
+The work orders abstraction gives powerful control to the Quickstep scheduler.
 
 \paragraph{Using the Quickstep Scheduler to meet different objectives:}
+We showcase the versatility of the Quickstep scheduler by demonstrating how it can be used to meet various objectives.
+Specifically we show the Quickstep scheduler in two scenarios.
+First, we show how the scheduler can allocate resources such as CPU to concurrent queries through well defined policies such as fair and prioirity-based policies.
+We propose a probabilistic scheduling approach, which gives the resource administrators a knob to allocate resources to concurrently running queries in the system.
+We believe that this work can be useful in the age of cloud databases, where the \textit{pay as you go} philosophy for resource consumption can become the norm.
+
+Second, we analyze the impact of scheduling strategies on query performance.
+For this analysis we focus on \textit{pipelining}, a well known technique in database systems that deals with the interaction of two adjacent relational operators in a query plan DAG. 
+Disk-based database systems prefer pipelined query processing over non-pipelining query processing.
+We question this preference in the in-memory based systems and show that the gap between pipelining and non-pipelining is not as wide.
+We study the connection between pipelining performance and parameters such as degree of parallelism, storage formats, block size and hardware prefetching.
+We propose an algorithm that given a query plan and the resource availability, produces a sequence of pipelines that can provide good query performance.
