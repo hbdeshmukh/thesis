@@ -14,28 +14,28 @@
 Quickstep
 implements a collection of relational algebraic operators, using efficient algorithms for each operation. % that come close to producing bare-metal performance for the individual operations
  %(more details are discussed in Section~\ref{evaluation}). 
-This ``kernel'' can be used to run a variety of applications, including SQL-based data analytics (the focus of this paper) and other classes of analytics/machine learning (using the approach outlined in~\cite{FanRP15, QuickFOIL}). This paper focuses only on SQL analytics.
+This ``kernel'' can be used to run a variety of applications, including SQL-based data analytics (the focus of our work) and other classes of analytics/machine learning (using the approach outlined in~\cite{FanRP15, QuickFOIL}). 
+Our work only focuses only on SQL analytics.
 %a.k.a. Data Warehousing), but can also include other analytical application classes. These other classes are graph analytics, many propositional machine learning methods, and relational learning. These applications can be supported as they can be mapped to an underlying relational algebra (using methods such as~\cite{FanRP15, QuickFOIL, madlib, JindalR0MDS14}). The focus of this paper is only on the SQL analytics component, and we omit further discussion of the other application classes in this paper, and refer the interested reader to recipes for supporting graph analytics~\cite{FanRP15}, relational learning~\cite{QuickFOIL} and document stores~\cite{json-relational} as examples of applications that go beyond SQL. 
 
 \subsection{Query Language and Data Model} \label{model-n-query-language}
 
 \Quickstep\ uses a relational data model, and SQL as its query language. 
-%Table~\ref{table:types} describes the various types currently supported by \Quickstep. 
-Currently, the system supports the following types: \texttt{INTEGER} (32-bit signed), \texttt{BIGINT}/\texttt{LONG} (64-bit signed), \texttt{REAL}/\texttt{FLOAT} (IEEE 754 \textit{binary32}), \texttt{DOUBLE PRECISION} (IEEE 754 \textit{binary64}), fixed-point \texttt{DECIMAL}, fixed-length \texttt{CHAR} strings, variable-length \texttt{VARCHAR} strings,  \texttt{DATETIME}/\texttt{TIMESTAMP} (with microsecond resolution), date-time \texttt{INTERVAL}, and year-month \texttt{INTERVAL}. 
+Table~\ref{table:types} describes the various types currently supported by \Quickstep. 
+%Currently, the system supports the following types: \texttt{INTEGER} (32-bit signed), \texttt{BIGINT}/\texttt{LONG} (64-bit signed), \texttt{REAL}/\texttt{FLOAT} (IEEE 754 \textit{binary32}), \texttt{DOUBLE PRECISION} (IEEE 754 \textit{binary64}), fixed-point \texttt{DECIMAL}, fixed-length \texttt{CHAR} strings, variable-length \texttt{VARCHAR} strings, \\ \texttt{DATETIME}/\texttt{TIMESTAMP} (with microsecond resolution), date-time \texttt{INTERVAL}, and year-month \texttt{INTERVAL}. 
 
-%\begin{table}[t]
-%	\centering
-%	\begin{tabular}{|p{2.5cm}|p{4.5cm}|} \hline
-%		\multirow{5}{*}{\textbf{Numeric types}} &  \small{\texttt{INTEGER} (32-bit signed)} \\ & \small{\texttt{BIGINT}/\texttt{LONG} (64-bit signed)} \\  & \small{\texttt{REAL}/\texttt{FLOAT} (IEEE 754 \textit{binary32} format)} \\ & \small{\texttt{DOUBLE PRECISION} (IEEE 754 \textit{binary64} format)} \\ & \small{fixed-point \texttt{DECIMAL}} \\ \hline
-%		\multirow{5}{*}{\textbf{Non-numeric types}} & \texttt{CHAR} strings \\ & variable-length  \texttt{VARCHAR} strings \\ & \texttt{DATETIME}/\texttt{TIMESTAMP} (microsecond resolution) \\ & Date-time \texttt{INTERVAL} \\ & Year-month \texttt{INTERVAL} \\ \hline  
-%	\end{tabular}
-%	\caption{Types in \Quickstep}
-%	\label{table:types}
-%\end{table}
+\begin{table}[t]
+	\centering
+	\begin{tabular}{|c|c|} \hline
+		\multirow{5}{*}{\textbf{Numeric types}} &  \small{\texttt{INTEGER} (32-bit signed)} \\ & \small{\texttt{BIGINT}/\texttt{LONG} (64-bit signed)} \\  & \small{\texttt{REAL}/\texttt{FLOAT} (IEEE 754 \textit{binary32} format)} \\ & \small{\texttt{DOUBLE PRECISION} (IEEE 754 \textit{binary64} format)} \\ & \small{fixed-point \texttt{DECIMAL}} \\ \hline
+		\multirow{5}{*}{\textbf{Non-numeric types}} & \texttt{CHAR} strings \\ & variable-length  \texttt{VARCHAR} strings \\ & \texttt{DATETIME}/\texttt{TIMESTAMP} (microsecond resolution) \\ & Date-time \texttt{INTERVAL} \\ & Year-month \texttt{INTERVAL} \\ \hline  
+	\end{tabular}
+	\caption{Types in \Quickstep}
+	\label{table:types}
+\end{table}
 %All these data types support \texttt{NULL} values including three-valued comparison logic. %The type system code is internally organized as a (C++) hierarchy, making it easy to add new types. %However, adding new types requires recompilation of the system; i.e., we do not have dynamic types or user-defined types, although the type system subcomponent has been designed to allow for such additions in the future. 
 
 %\Quickstep\ currently supports a limited class of SQL, including correlated queries. It currently does not support SQL window functions. 
-
 
 \subsection{System Overview} \label{overview}
 The internal architecture of \Quickstep\ %is shown in Figure~\ref{fig-block-arch}, and 

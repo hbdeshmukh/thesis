@@ -8,11 +8,15 @@
 \end{figure*}
 
 \section{Evaluation} \label{evaluation}
-In this section, we present results from an empirical evaluation comparing Quickstep with other systems. We note that performance evaluation is always a tricky proposition as there are a large number of potential systems to compare with. Our goal here is to compare with popular systems that allow running end-to-end queries for TPC-H and SSB benchmarks, and pick three popular representative systems that each have different approaches to high performance analytics, and support stand-alone/single node in-memory query execution. We note that a large number of different SQL data platforms have been built over the past four decades, and a comparison of all systems in this ecosystem is beyond the scope of this paper.
+In this section, we present results from an empirical evaluation comparing Quickstep with other systems. We note that performance evaluation is always a tricky proposition as there are a large number of potential systems to compare with. Our goal here is to compare with popular systems that allow running end-to-end queries for TPC-H and SSB benchmarks, and pick three popular representative systems that each have different approaches to high performance analytics, and support stand-alone/single node in-memory query execution. We note that a large number of different SQL data platforms have been built over the past four decades, and a comparison of all systems in this ecosystem is beyond the scope of our study.
 
 %We also note that there are a number of recent systems that address parts of queries in such benchmarks (e.g.~\cite{Vodoo}), but to the best of our knowledge end-to-end
 
-The three open-source systems that we use are MonetDB~\cite{monetdb}, PostgreSQL~\cite{postgres} and Spark~\cite{Spark, SparkSQL} and the commercial system is VectorWise~\cite{vectorwise}. We note that there is a lack of open-source in-memory systems that focus on high-performance on a single node (the focus of this paper). VectorWise and Hyper~\cite{hyper} are newer systems, and though informal claims for them easily outperforming MonetDB can often be heard at conferences, that aspect has never been cataloged before. We hope that using both VectorWise  and MonetDB in our study fills part of this gap. We would have liked to try Hyper, as both VectorWise and Hyper represent systems in this space that were designed over the last decade; but as readers may be aware, Hyper is no longer available for evaluation.
+The three open-source systems that we use are MonetDB~\cite{monetdb}, PostgreSQL~\cite{postgres} and Spark~\cite{Spark, SparkSQL} and the commercial system is VectorWise~\cite{vectorwise}. 
+We note that there is a lack of open-source in-memory systems that focus on high-performance on a single node (the focus of the Quickstep system). 
+VectorWise and Hyper~\cite{hyper} are newer systems, and though informal claims for them easily outperforming MonetDB can often be heard at conferences, that aspect has never been cataloged before. 
+We hope that using both VectorWise  and MonetDB in our study fills part of this gap. 
+We would have liked to try Hyper, as both VectorWise and Hyper represent systems in this space that were designed over the last decade; but as readers may be aware, Hyper is no longer available for evaluation.
 %We also note that the open-source nature of Quickstep means that anyone can use Quickstep for benchmarking without needing to hide the product name, allowing more transparent comparisons across different papers on the same topic. Furthermore, access to the source code allows one to better understand the reasons behind certain performance behaviors, which is otherwise hard to do when only binaries are available.
 %(We also point out that there are no recent in-memory database engines that the community can openly experiment with. We hope that with this paper we can help address this issue by presenting an open-source system, which can now allow the research community to actually understand the factors behind end-to-end performance behavior, which often is hard to do when only binaries are available and/or license restrictions prevent disclosing the actual system being used).
 
@@ -311,7 +315,7 @@ An interesting aspect of using a work-order based scheduler (described in Sectio
 
 \begin{figure}[thb]
 \centering
-   \includegraphics[width=\columnwidth,height=4.2in]{system/figures/q31-progress.pdf}
+   \includegraphics[width=0.6\columnwidth,height=4.2in]{system/figures/q31-progress.pdf}
    \caption{\small \textbf{Query progress status. Green nodes (0-5) indicate work that is completed, the yellow node (6) corresponds to operators whose work-orders are currently being executed, and the blue nodes (7-13) show the work that has yet to be started.}}
    \label{fig-query-progress}
 \end{figure}
