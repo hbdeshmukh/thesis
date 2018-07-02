@@ -1,6 +1,6 @@
 \chapter{Introduction}
 %\paragraph{Scheduling on a high level}
-Computer systems need resources to function. 
+Computer programs need computing, storage and communication resources to function. 
 Usually the availability of such resources is limited and the system has to share these resources among multiple users. 
 Resource management is an important aspect of a system.
 Scheduling falls under the umbrella of resource management. 
@@ -116,17 +116,19 @@ We want scheduler as a first class primitive in the database architecture and th
 We now present the contributions of this dissertation. 
 
 \paragraph{Design and Implementation of the Quickstep Database System:}
-We present the design and implementation of the Quickstep database system. 
-Quickstep targets high speed in-memory relational analytics. 
+The work in this thesis is carried out in the Quickstep Database System~\cite{quickstep-vldb, patel1quickstep, Quickstep}.
+We begin by presenting the design and implementation of Quickstep.
+
+Quickstep targets high performance for in-memory relational analytics. 
 We describe the various components of the system including storage manager, query optimizer, query execution engine (which consists the query scheduler), and the expression evaluation module. 
-Through benchmarking against other systems, we show that Quickstep is faster than other systems.
+Through benchmarking against other systems, we show that Quickstep is faster than other systems, often by an order of magnitude.
 
 \paragraph{Design and Implementation of the Quickstep Scheduler:}
 The core focus of this dissertation is Quickstep's query scheduler. 
-We describe the \textbf{nuts and bolts} of the scheduler.
+We describe the \textit{nuts and bolts} of the scheduler.
 We propose a novel task abstraction called \textit{work orders} used for query processing in Quickstep.
-The abstraction is used by all the relational operators implemented in Quickstep.
-The work orders abstraction gives powerful control to the Quickstep scheduler.
+The work done in a query is broken up in several work orders.
+Thus the work orders abstraction is used by all the relational operators implemented in Quickstep and it enables the system to exploit the large degree of parallelism offered by modern hardware.
 
 \paragraph{Using the Quickstep Scheduler to meet different objectives:}
 We showcase the versatility of the Quickstep scheduler by demonstrating how it can be used to meet various objectives.
