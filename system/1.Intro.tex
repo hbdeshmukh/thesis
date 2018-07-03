@@ -2,28 +2,13 @@
 \chapter{Design and Implementation of Quickstep System}
 
 \section{Introduction}
-Query processing systems today face a host of challenges that were not as prominent just a few years ago. A key change has been dramatic changes in the hardware landscape that is driven by the need to consider energy as a first-class (hardware) design parameter. Across the entire processor-IO hierarchy, the hardware paradigm today looks very different than it did just a few years ago. Consequently, we are now experiencing a growing \textit{deficit} between the pace of hardware performance improvements and the pace that is demanded of data processing kernels to keep up with the growth in data volumes.
+Query processing systems today face a host of challenges that were not as prominent just a few years ago. 
+A key change has been dramatic changes in the hardware landscape that is driven by the need to consider energy as a first-class (hardware) design parameter. Across the entire processor-IO hierarchy, the hardware paradigm today looks very different than it did just a few years ago. Consequently, we are now experiencing a growing \textit{deficit} (illustrated in Figure~\ref{fig-deficit}) between the pace of hardware performance improvements and the pace that is demanded of data processing kernels to keep up with the growth in data volumes.
 
-%\begin{figure}
-%\centering
-%   \includegraphics[width=\columnwidth]{system/figures/deficit.pdf}
-%   \vspace*{-2em}
-%   \caption{\textbf{Processor performance improvement as measured by the highest reported CINT2006 benchmark result for Intel Xeon chips from~\cite{cpu2006} compared to the number of pages indexed by Google (using estimates made by~\cite{google-pages-db}). The figure does not show the increase in the number of queries (which is about 2.5X for Google search queries from 2011--14), and the increase in the complexity of queries as applications request richer analytics. These aspects make the deficit problem worse. The figure also shows the maximum number of cores per chip used in reported CINT2006 results over time. Interestingly (and not shown in the figure), both the minimum and the average amount of memory per chip in the reported CINT2006 results has grown by $\approx$4X from 2011 to 2017.}}
-%   % For example, the number of Google search queries has gone up by a factor of 6X in the time period shown in the graph above.}
-%   \label{fig-deficit}
-%\end{figure}
-
-Figure~\ref{fig-deficit} illustrates this deficit issue by comparing improvements in processor performance (blue line) with the growth rate of data (green line), using the number of pages indexed by Google as an illustrative example. This data growth rate is conservative for many organizations, which tend to see a far higher rate of increase in the data volume; for example, Facebook's warehouse grew by 3X in 2014~\cite{fb-growth-14}. This figure also shows (using a dotted orange line with squares) the growth in the number of cores per processor over time. As one can observe, the number of cores per processor is rising rapidly. % as multi-core parallelism is critical for processor vendors.
-%to realizing overall higher processor performance.
-%(While we do not consider this further in this paper, the number of cores per processing unit is even higher for non-traditional processors/co-processors.)
-% Thus, the demands on query processing can't simply be met by only throwing more chips/processors at the problem.
-%Thus, there is a critical need for systems that can exploit the full potential of the hardware parallelism that is available in each box.
-In addition, %as noted in the caption of the figure,
-since 2011 the main memory sizes are also growing rapidly, and there is an increasing shift to larger main memory configurations. 
-Thus, there is a critical need for in-memory data processing methods that \textit{scale-up} to exploit the full (parallel) processing power that is locked in commodity multi-core servers today. \Quickstep\ targets this need, and in this chapter we describe the initial version of Quickstep that targets single-node in-memory read-mostly analytic workloads.
-
-%Next, we describe key aspects of the Quickstep system.
-To pay off the deficit, Quickstep uses mechanisms that allow for \textit{high intra-operator parallelism}. 
+Our attempt to pay off this deficit is through a system called \Quickstep.
+Our goal is to exploit the full (parallel) processing power that is locked in commodity multi-core servers today.
+We describe the initial version of Quickstep that targets single-node in-memory read-mostly analytic workloads.
+Quickstep uses mechanisms that allow for \textit{high intra-operator parallelism}. 
 Such mechanisms are critical to exploit the full potential of the high level of hardware compute parallelism that is present in modern servers (the dotted orange line in Figure~\ref{fig-deficit}).
 
 Unlike most research database management systems (DBMSs), \Quickstep\ has a storage manager with a block layout, where each block behaves like a mini self-contained database~\cite{ChasseurP13}.

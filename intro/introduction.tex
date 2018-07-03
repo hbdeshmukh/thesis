@@ -40,23 +40,20 @@ However, what we are experiencing is a growing \textit{deficit} between the pace
 
 \begin{figure}
 	\centering
-	\includegraphics[width=\columnwidth]{system/figures/deficit.pdf}
-%	\vspace*{-2em}
-	\caption{\textbf{Processor performance improvement as measured by the highest reported CINT2006 benchmark result for Intel Xeon chips from~\cite{cpu2006} compared to the number of pages indexed by Google (using estimates made by~\cite{google-pages-db}). The figure does not show the increase in the number of queries (which is about 2.5X for Google search queries from 2011--14), and the increase in the complexity of queries as applications request richer analytics. These aspects make the deficit problem worse. The figure also shows the maximum number of cores per chip used in reported CINT2006 results over time. Interestingly (and not shown in the figure), both the minimum and the average amount of memory per chip in the reported CINT2006 results has grown by $\approx$4X from 2011 to 2017.}}
-	% For example, the number of Google search queries has gone up by a factor of 6X in the time period shown in the graph above.}
+	\includegraphics[width=0.75\textwidth]{system/figures/deficit.pdf}
+	\caption{\textbf{Deficit - Widening gap between hardware evolution and data generation}}
 	\label{fig-deficit}
 \end{figure}
 
 Figure~\ref{fig-deficit} illustrates this deficit issue by comparing improvements in processor performance (blue line) with the growth rate of data (green line), using the number of pages indexed by Google as an illustrative example. 
-This data growth rate is conservative for many organizations, which tend to see a far higher rate of increase in the data volume; for example, Facebook's warehouse grew by 3X in 2014~\cite{fb-growth-14}. 
-This figure also shows (using a dotted orange line with squares) the growth in the number of cores per processor over time. 
-As one can observe, the number of cores per processor is rising rapidly. % as multi-core parallelism is critical for processor vendors.
-%to realizing overall higher processor performance.
-%(While we do not consider this further in this paper, the number of cores per processing unit is even higher for non-traditional processors/co-processors.)
-% Thus, the demands on query processing can't simply be met by only throwing more chips/processors at the problem.
-%Thus, there is a critical need for systems that can exploit the full potential of the hardware parallelism that is available in each box.
-In addition, %as noted in the caption of the figure,
-since 2011 the main memory sizes are also growing rapidly, and there is an increasing shift to larger main memory configurations. 
+The processor performance improvements presented in Figure~\ref{fig-deficit} are measured by the highest reported CINT2006 benchmark result for Intel Xeon chips from~\cite{cpu2006}.
+We use the number of pages indexed by Google (using estimates made by~\cite{google-pages-db}) as a proxy for data growth. 
+Figure~\ref{fig-deficit} does not show the increase in the number of queries (which is about 2.5X for Google search queries from 2011--14), and the increase in the complexity of queries as applications request richer analytics. These aspects make the deficit problem worse. The figure also shows the maximum number of cores per chip used in reported CINT2006 results over time. Interestingly (and not shown in the figure), both the minimum and the average amount of memory per chip in the reported CINT2006 results has grown by $\approx$4X from 2011 to 2017.
+
+The presented data growth rate is conservative for many organizations, which tend to see a far higher rate of increase in the data volume; for example, Facebook's warehouse grew by 3X in 2014~\cite{fb-growth-14}. 
+Figure~\ref{fig-deficit} also shows (using a dotted orange line with squares) the growth in the number of cores per processor over time. 
+As one can observe, the number of cores per processor is rising rapidly.
+In addition, since 2011 the main memory sizes are also growing rapidly, and there is an increasing shift to larger main memory configurations. 
 
 In addition to the data growth, there is a growing interest in finding more insights from the data as quickly as possible.
 In addition to the traditional online analytical processing (OLAP), there is an increased interest in advanced analytics~\cite{DBLP:conf/sigmod/Kumar0017} (which involves machine learning algorithms), both from academic community as well as industry. 
