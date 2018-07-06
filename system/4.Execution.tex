@@ -79,7 +79,7 @@ we first describe the work order abstraction and provide a few example work orde
 
 \begin{figure}
 \centering
-   \includegraphics[width=.7\columnwidth]{system/figures/physical-plan.pdf}
+   \includegraphics[width=.5\textwidth]{system/figures/physical-plan.pdf}
    \caption{\textbf{Plan DAG for the sample query}}
    \label{fig-dag}
 \end{figure}
@@ -103,7 +103,6 @@ emph={SUM}]
   AND    P.category = 'swim'
 \end{lstlisting}
 
-
 \subsubsection{Work Order}
 
 %Each relational operator presents the work that needs to be done to execute the query using \textit{work orders}.
@@ -122,19 +121,8 @@ The scheduler begins executing this query by fetching work orders for the select
 
 The scheduler assigns these work orders to available workers, which then execute them. All output is written to temporary storage blocks. After executing a work order, the worker sends a completion message to the scheduler, which includes execution statistics that can be used %by the scheduler
 to analyze the query execution behavior.
-%The scheduler also relays references to temporary blocks to the next operator in the pipeline.
-
-% which involves the following steps: reading the input block, evaluating the predicate over the block, and writing its output to another block. As noted earlier, the predicate evaluation method for different blocks may be different, subject to their layout, availability of indexes inside the block etc. The complexity of predicate evaluation is abstracted within a block (cf. Section~\ref{block-structure}), and the worker thread and work order code need not know anything about it. As noted in Section~\ref{vectorization}, at run-time each block can decide how to evaluate the predicates. This run-time micro-optimizer picks the physical plan with the lowest estimated cost to evaluate a predicate within each block (possibly using different techniques for different parts of a complex predicate tree). Currently, this micro-optimizer simply employs a pre-defined order of preference for different applicable access paths, but we plan to add basic statistics and selectivity estimation in the future.
 
 \subsubsection{Implementation of Pipelining}
-%We now explain how pipelining is implemented in the work order based execution framework.
-
-%Note that in the example query, the hash table is built on the output of the select operator on the Product table.
-%The edge connecting the Select operator and the build hash operator allows for \textit{ pipelining}.
-%As soon as a filled block of output from an upstream operator (the Select operator in this case) is available, it is streamed to its consumer operator (the build hash operator).
-%As soon as some input is available, a work order is created which can then be scheduled by the scheduler.
-
-%The Probe hash work order execution involves checking the hash table for match(es) and writing them to temporary output block(s).
 In our example DAG (Figure~\ref{fig-dag}), the edge from the Probe hash operator to the Aggregate operator allows for data pipelining.
 As described earlier, the output of each probe hash work order is written in some temporary blocks.
 Fully-filled output blocks of probe hash operators can be streamed to the aggregation operator (shown using the symbol $\gamma$ in the figure).
@@ -144,55 +132,11 @@ The design of the Quickstep scheduler separates control flow from data flow.
 The control flow decisions are encapsulated in the work order scheduling policy.
 This policy can be tuned to achieve different objectives, such as aiming for high performance, staying with a certain level of concurrency/CPU resource consumption for a query, etc.
 In the current implementation, the scheduler \textit{eagerly} schedules work orders as soon as they are available.
-%Multiple policies are supported including a priority-based policy. With a priority-based policy, work orders from high-priority queries are schedule more frequently. We illustrate this aspect further in Section~\ref{sec:expt:elasticity}. %For the discussion below, we assume a simple fair policy.
-
-%Furthermore, in the current implementation, work orders are executed in a FIFO order. (Clearly, there are future opportunities for exploring other scheduling policies. The key point is that by separating the scheduling policy from the scheduling mechanism, \Quickstep\ has a design that allows for easily varying the scheduling policy, and hence the overall system behavior.)
-
-%Returning to Figure~\ref{fig-dag}, to begin the Probe phase of the Hash Join, the building of the hash table must be complete (note the pipeline-breaking dependency between the Probe and the Build operator). After the build operator has completed, the scheduler is free to schedule a work order for each full block of tuples that is produced by the Select operator on the Buys table. We have a mechanism where the work orders completion triggers a signal to the scheduler indicating that a block is partially full. This mechanism ensures that if a single Selection work order produces a partially filled block, then a handle to that partially filled block is  available to another Selection work order that runs later. Thus, we minimize internal fragmentation for intermediate blocks. % between operators.
-%don't have internal fragmentation for blocks as the query execution moves through the DAG.
-
-%select work order on the buys table or it can wait until the building of hash table is over. The select work orders on buys get executed similarly as the select work orders on the Product table. There's one select work order per input block of Buys table and their output is written to a temporary block. Once the building of hash table is over, the probe hash operator produces work orders. Each of these work orders contain the input block ID of the output of the selection on buys, a pointer to the hash table, the join predicate and the projected attributes. Foreman fetches probe hash work orders and schedules them on the worker threads.
-
-%\begin{figure}[tb]
-%  \centering
-%   \includegraphics[height=.65\columnwidth, natwidth=280bp, natheight=247]{pictures/query-optimizer-architecture.pdf}
-%   \caption{The \Quickstep\ query optimizer architecture.}
-%   \label{fig-queryoptimizer-arch}
-%\end{figure}
-
-%which can produce additional work orders. These work orders involve the aggregation attribute.
 
 \subsubsection{Output Management}
 During query execution, intermediate results are written to temporary blocks. To minimize internal fragmentation and amortize block allocation overhead, workers reuse blocks belonging to the same output relation until they become full. To avoid memory pressure, these intermediate relations are dropped as soon as they have been completely consumed (see the Drop $\sigma$ Outputs operator in the DAG). Hash tables are also freed similarly (see the Drop Hash Table operator). An interesting avenue for future work is to explore whether delaying these Drop operators can allow sub-query reuse across queries.
-%
-%As mentioned earlier, a work order execution may generate output data which is written in temporary storage blocks.
-%The scheduler maintains a pool of such temporary blocks and these blocks may be reused by different work orders (not at the same time) to minimize internal fragmentation.
-%
-%%During the query execution, many temporary output blocks are created.
-%In the example query plan DAG shown in Figure~\ref{fig-dag}, beginning from the leaf level, the two select operators' output, the join output and finally the aggregation result is written to temporary blocks.
-%The query plan has various drop operators.
-%%whose work order execution involves deleting the temporary data.
-%These operators are used to drop the ``temporary'' data that is materialized during query execution and is no longer needed beyond a certain stage of the DAG.
-%There is a destroy hash table operator, whose work order execution frees the space occupied by the hash table once it has been used up.
-%The position of the drop table operators in the query plan is such that we can free up as much space as possible.
-
-%Recall that the structures such as Hash Tables are created in buffer pool memory, so all memory management is purposely designed to be within the purview of the buffer manager. Another interesting aspect of this design is that scheduling the drop operators could be delayed, thereby providing a mechanism for reusing sub-query work, potentially across queries. Investigating this in detail is beyond the scope of this paper. %Delaying the drop operator can also be beneficial in certain learning algorithms that benefit from reusing the the hash table, such as~\cite{QuickFOIL}.)
-
-%\subsubsection{Work Order Dispatch}
-%We've experimented with two models for dispatching work orders from foreman to the workers. In the pull-based model, the foreman places all the schedulable work orders on a global shared queue protected by mutex. All the worker threads poll this queue for any new work order. Once they finish the work order execution, they send a completion message back to foreman which can be used by the foreman for query progress monitoring.
-
-%In the push-based model, each worker owns a private queue. The foreman places work orders individually on each of such private queues. The difference between the pull-based and the push-based model is that the in the push-based model, the foreman knows exactly which work order gets executed by which worker. In terms of implementation, the push-based model uses TMB for transporting the work orders and completion messages.
-
-
-%\reminder{I dropped a subsection about Work Order Execution from here. It talks about implementation details at the level of C++ classes and methods, which seems too low-level given we removed such details almost everywhere else. I also moved the progress-monitoring stuff to the overview of Section 4.}
-%\subsubsection{Work Order Execution} \label{sec:work-order-execution}
-%The work orders are implemented as C++ classes, and there is one implementation for each operator in the system. Each work order class implements a virtual, thread-safe execute() method, which contains the implementation for work orders of that class. Each worker thread simply executes this method. This design makes it easy to add new operators or to extend an existing operator.
-%
-%We note that another advantage of our work-order based scheduler is that the work done by the scheduler can  be easily recorded and used to show the current status of the query, and this can be done in a way that does not require any operator code changes. We illustrate this aspect in Section~\ref{sec:progress-monitoring}.
 
  \subsection{Separation of Policy and Mechanism} \label{sec:scheduler-policy-vs-mechanism}
-
-%The Quickstep scheduler design separates the scheduler mechanism (work order dispatch and signal of work order completion) from the policy that the scheduler may want to enforce. Internally, the scheduler uses a \textit{dispatch} data structure that lists all the work orders that are ready for execution for \textit{each} active query in the system. When a work order is completed, it implies that some worker thread is now free. The scheduler consults the dispatch data structure and another data structure that stores information about the \textit{priority} of each query. Work orders are dispatched from higher priority classes first, and additional hints can be used to determine how to deal with work orders  for queries in the same priority class (the default intra-class policy is fair). Thus a policy can be set based on both inter-class and intra-class considerations. In fact the policy can also be changed at run-time (switching a low priority query to a high-priority query while it is running, or vice versa). Thus, there is a clean separation between the scheduler mechanism and policy specification. The mechanism allow Quickstep to support policies, like priority-based scheduling (illustrated later in Section~\ref{sec:expt:elasticity}). Furthermore, by simply tracking the work orders, Quickstep can provide a built-in generic query progress monitor (shown below in Section~\ref{sec:progress-monitoring}).
 
 Quickstep's scheduler supports concurrent query execution. Recall that a query is decomposed into several work orders during execution. These work orders are organized in a data structure called the \textit{Work Order Container}. The scheduler maintains one such container per query. A \textit{single scheduling decision} involves: selection of a query $\rightarrow$ selection of a work order from the container $\rightarrow$ dispatching the work order to a worker thread. When concurrent queries are present, a key aspect of the scheduling decision is to select a query from the set of active concurrent queries, which we describe next.
 
@@ -213,12 +157,9 @@ The predictions about execution time of future work orders of a query are provid
 It uses a prediction model that takes execution statistics of the past work orders of a query as input and estimates the execution time for the future work orders for the query.
 
 The calculation of the probability values for different policies implemented in \Quickstep\, and their relation with the estimated work order execution time is presented in~\cite{scheduler}.
-%\reminder{It's unclear how the learning agent's prediction of execution time are being used to change probabilities that should reflect query priorities. I think this paragraph needs some clarification. Maybe explain the intuition behind the probabilistic framework first? Maybe a sentence about why this framework can capture both Fair and HPF policies?}
-%These probability values are continuously updated. An important information used to update the probability values is the prediction of the future work order for a query. Such a prediction is provided by a module called the \textit{Learning Agent}, which continuously monitors the execution times of work orders and uses a prediction model (the default is Linear Regression) to predict the execution time of the future work orders.
 
-%\reminder{The following two sentences are redundant, but may be worth keeping.}
 To prevent the system from thrashing (e.g. out of memory), a load controller is in-built into the scheduler.
-During concurrent execution of the queries, the load controller can control the admission of queries into the system and it may suspend resource intensive queries, to ensure resource availability.  %In addition, there is a policy manager that supports a variety of policies for resource allocations across concurrent queries. The current policies are fair resource allocation (default) and highest-priority first. At this point the only resource that is considered by the scheduler and the load controller is the CPU, but the policy manager is extensible to consider the resource utilization for other components such as memory consumption.
+During concurrent execution of the queries, the load controller can control the admission of queries into the system and it may suspend resource intensive queries, to ensure resource availability.
 
 \begin{figure*}[t]
 \centering
@@ -248,76 +189,3 @@ During concurrent execution of the queries, the load controller can control the 
 \end{figure*}
 
 Finally, we note that by simply tracking the work orders that are completed, Quickstep can provide a built-in generic query progress monitor (shown in Section~\ref{sec:progress-monitoring}).
-
-%\subsection{TMB} \label{tmb}
-%The Transactional Message Bus (TMB for short) is a communication framework designed for scalability (both within a node and across clusters) and reliability~\cite{tmb-full-paper}. Although developed as part of the \Quickstep\ project, it is a fully self-contained and general-purpose framework that can be used in other applications. The TMB provides a general-purpose message bus that maintains a consistent view of clients that are connected to it and a queue of incoming messages on each client's behalf. The message bus is \textit{transactional} in the sense that any action using the bus (e.g. connecting/disconecting, sending or receiving messages, deleting or cancelling messages, etc.) is an ACID transaction on the state of the bus. The semantics of message addressing and delivery are well-defined and based on causal ordering~\cite{causal-multicast}. There are several mutually-compatible implementations of the TMB available, some of which ``piggyback'' on existing transaction-processing systems, as well as a native implementation that consists of a custom in-memory transaction manager and simple write-ahead log for durability and recovery.
-
-%Besides its core responsibility of reliable message delivery between clients, the TMB includes some additional features that are desirable when building a reliable and responsive parallel or distributed system. These include group messaging, separate message reciept and deletion for reliability when clients may fail, and tied messages to mitigate variable latency and work skew~\cite{tail-at-scale}. Because the TMB is itself a kind of database, it can also be queried for informational purposes (e.g. queue lengths can be examined for progress monitoring and straggler detection).
-
-
-%\subsection{Partitioning} \label{sec-partitioning}
-%\Quickstep\ also has the notion of partitioning a table, which is used to control the distribution of data across NUMA memory.
-%
-%A relation can be partitioned horizontally using either \textit{hash} or \textit{range} partitioning. Both base and temporary relations can be partitioned. Every relation that is partitioned has an associated \textit{partition scheme}. A partition scheme %is implemented internally as a C++ class which
-%records the partitioning function, the partitioning attribute(s),
-%%the number of partitions,
-%and a map of the blocks to each partition.
-%
-%When tuples are inserted into a relation, the partition scheme determines which partition each tuple belongs to based on its own internal policy (e.g. computing the hash of a particular attribute's value and then computing the remainder modulo the number of partitions), and divides the tuples so that they are inserted into blocks belonging to the appropriate partition. %The partition scheme class defines a generic interface that allows for other partitioning methods besides simple hash and range-based partitioning to be easily added in the future.
-%
-%%\begin{figure}
-%%\centering
-%%\includegraphics[width=2.5in]{pictures/numa-optimization}
-%%\caption{NUMA optimization}\label{fig-numa}
-%%\end{figure}
-%
-%The following example illustrates hash partitioning, where the hash function for integers is the identity function. Consider a relation R, with a single attribute of type integer, which is also the partitioning attribute. The relation is hash partitioned with 4 partitions. When a tuple with value 0 or 4 is inserted, the tuple is placed in a block belonging to partition 0. When the next tuple with value 1 or 5 is inserted, although there is space left in the block that was previously created, a new block is created since this tuple belongs to partition 1. In a similar way, all the tuples belonging to a particular partition are inserted into blocks that belong to that partition.
-%
-%When an operator in \Quickstep\ needs to write data to blocks, it uses a class called \textit{InsertDestination}, which has methods for inserting tuples one-at-a-time or in bulk. The InsertDestination interface is responsible for the common tasks of pushing data into blocks, creating new empty blocks as needed, and signaling to the foreman when blocks are full and ready to be consumed.
-%InsertDestinations have an associated partition scheme (the default is no partitioning).
-%
-%When inserting tuples into an InsertDestination, a pass is first made to assign each tuple to a partition (querying the Partition Scheme). Then, tuples are bulk-inserted into blocks belonging to the appropriate partitions, with new blocks being created in each partition when needed. By implementing partitioning as an option in the common tuple-insertion path, we can easily partition relations when data is loaded \textit{or} repartition the output of any operator on-the-fly as part of normal query execution.
-%
-%To illustrate how partitioning works, consider the following query: % (we also reuse this query later in Section~\ref{eval-numa}): \vspace*{-0.5ex} \reminder{check}
-%\begin{verbatim}
-%  SELECT p_partkey FROM lineorder JOIN part;
-%\end{verbatim} \vspace*{-0.5ex}
-%
-%%In the query shown in the Section~\ref{eval-numa}, the end-to-end partitioning works as follows:
-%Assume that the relations \textsf{lineorder} and \textsf{part} are partitioned into four partitions each, using hash-partitioning on the join key when they are created. When the data is loaded for these relations, each tuple is inserted into a block belonging to the appropriate partition. If the system has four sockets, then each  corresponding partition of both the relations are placed across the four sockets, with one partition-pair per socket. When computing the hash join between these two relations, four hash tables are created, with one per partition-pair across the four (NUMA) sockets. Work orders for both the build and the probe phase of the hash join will access local memory on only one NUMA socket for input blocks, the hash table, and for materializing join output.
-%
-%The scheduler (described above in Section~\ref{scheduler}) is also NUMA-aware, and
-%whenever possible aims to send work orders to the NUMA node where the data referred to in the work order resides.
-%
-%%aims to send each work order to a worker thread running on the NUMA node where the input blocks referred to in the work order reside. The scheduler can be configured to be \textit{strict} with regard to NUMA-aware scheduling (only giving workers NUMA-local work orders), or to allow a relaxed \textit{work-stealing} policy, where idle workers on other sockets can be assigned non-local work orders at times when there are no NUMA-local work orders for them to process.
-%
-%\begin{figure*}
-%\centering
-%\begin{minipage}{.31\textwidth}
-%  \centering
-%  \includegraphics[width=2.2in]{pictures/elasticity-scan}
-%  \caption{Elasticity with a Scan query \newline \newline }
-%  \label{fig-elasticity-scan}
-%\end{minipage}%
-%\quad
-%\begin{minipage}{.31\textwidth}
-%  \centering
-%  \includegraphics[width=2.2in]{pictures/elasticity-join1}
-%  \caption{Elasticity with a Join query: Add a second thread mid-way through the build phase}
-%  \label{fig-elasticity-join1}
-%\end{minipage}%
-%\quad
-%\begin{minipage}{.31\textwidth}
-%  \centering
-%  \includegraphics[width=2.2in]{pictures/elasticity-join2}
-%  \caption{Elasticity with a Join query: Add a second thread at the end of the build phase}
-%  \label{fig-elasticity-join2}
-%\end{minipage}
-%\end{figure*}
-
-%\subsection{WideTables} \label{sec-widetables}
-%\Quickstep\ can also use a schema-based denormalization technique called WideTable~\cite{widetable}. This technique walks through the schema graph of the database, and converts all foreign-key primary-key ``links'' into an outer-join expression (to preserve NULL semantics). The resulting ``flattened'' table is called a WideTable, and is essentially a denormalized view of the entire database. The columns in this WideTable are stored as column-stores, and BitWeaving indices can be additionally built on columns of interest.
-%
-%This type of denormalization is largely agnostic of workload characteristics (it is a schema-based transformation). It has been acknowledged that such techniques are expensive for databases that are updated often, and our implementation is very rudimentary -- we currently have to recreate the WideTable on updates. Techniques for incrementally updating the WideTable (rather than recreating it from scratch) when new data is appended to existing tables can be envisioned, but we have yet to implement them.
-%
-%In addition, we have a relatively simple optimizer (recall from Section~\ref{overview} that we have a simple rule-based optimizer) that currently only allows for simple transformation of queries. As a result, only a limited class of queries can be answered for databases on which WideTables are built. Note, that \Quickstep\ does allow running queries using regular joins, so when a WideTable is dropped and has to be reconstructed, the system can still execute queries using traditional methods (although the performance may be lower).

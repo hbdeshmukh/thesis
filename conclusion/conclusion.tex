@@ -1,0 +1,56 @@
+\chapter{Conclusions and Future Work}
+In this chapter, we present our conclusions and discuss the future work.
+Through this dissertation, we present the design and implementation of a query scheduler.
+The goal of this scheduler is to efficiently execute queries in an in-memory environment while effectively exploiting the features provided by the modern hardware. 
+A key contribution of this dissertation is to demonstrate that the scheduler is capable of playing an important role in the database system architecture.
+
+In Chapter~\ref{chap:quickstep}, we present the design and implementation of the Quickstep database system. 
+Quickstep has a unique block based storage management system, that supports variety of storage formats such as row store, column store along with support for compression. 
+The query execution in Quickstep happens with the help of a task abstraction called work orders. 
+The work orders abstraction connects storage management in Quickstep with the execution engine. 
+Quickstep's query scheduler, which is the focus of this dissertation controls the execution of these work orders and thus manages query execution in the system. 
+Through our experimental evaluation, we show that the intra-operator and inter-operator parallelism through the work orders abstraction speeds up the query execution in Quickstep.
+The work order abstraction is instrumental for realizing intra-operator parallellism.
+Comparison with other systems also show that Quickstep is faster than other systems, often by orders of magnitude. 
+
+In Chapters~\ref{chap:policy} and Chapter\todo{add-pipelining-chapter}, we show that the scheduler can be used to meet multiple objectives.
+In Chapter~\ref{chap:policy} we use the scheduler for the problem of resource governance.
+We specifically target the problem of allocating resources such as CPU to concurrent queries according to well defined policies.
+A key challenge in this problem is the fluctuation in the resource requirements of a query.
+We target real time queries setting, in which queries could arrive at any time, thus it further complicates the problem.
+Our solution uses a probabilistic framework for taking the scheduling decisions and thereby allocating resources to queries.
+The probabilistic framework is backed by a learning agent, that monitors the resource consumption in the system and using learning techniques, predicts the resource requirements of queries in the near future.  
+We form a close loop between scheduling decisions and the learning, where the learning agent monitors the system, predicts the future resource requirements and tweaks the probabilities. 
+The adjusted probabilities result in change in the resource allocation, leading the system closer to meeting the high level policy goals.
+Our experimental evaluation shows that Quickstep scheduler can meet the goals for a variety of policies including fair and priority-based. 
+
+Chapter\todo{add-pipelining-chapter} uses the scheduler for the performance objective.
+Here we analyze the role of pipelining in the in-memory settings. 
+We cast pipelining as a schedule in which consumer tasks (or work orders) are interleaved with the producer tasks. 
+We compare pipelining with a non-pipelining strategy in which the said interleaving is not present. 
+The two strategies differ primarily in the eagerness of data processing by the consumer operator. 
+We underscore the impact of various parameters such as number of threads, the size of blocks, and hardware prefetching on the relative performance of the two pipelining strategies. 
+Our analysis shows that the relative gap between the two strategies is not as high as in the disk based settings. 
+An important reason behind the similar performance lies in the executiontime distribution between operators
+in the query plan.
+Many queries have certain dominant operators, that subside the impact of pipelining on query performance.
+
+One key contribution through our study is the importance of degree of parallelism in query performance. 
+Pipelining can provide superior performance in cases when operators in the pipeline have scalability issues (with increasing number of threads). 
+We present an algorithm that sequences the various pipelines in a query plan with the goal of maximizing query performance.  
+Our evaluation on TPC-H queries show that the algorithm often produces pipeline sequences with better performance than other pipeline sequences. 
+
+Our scheduling work leads to many interesting future work directions.
+There is an ongoing effort to make Quickstep work efficiently on a distributed setup. 
+The distributed setting offers some challenges which are not as relevant in the in-memory single node setting.
+Locality of a work order execution is quite important in the distributed setting.
+The penalty of a non-local execution involves high data movement cost over network, which can degrade query performance.
+Load balancing is another important aspect that a distributed query scheduler has to worry about.
+Overloading a node with work can throttle the query processing and may cause bottlenecks.
+A subtle aspect in distributed query scheduling is that the control traffic (e.g. dispathing a work order, receving work order completion feedback) may be expensive.
+Therefore the scheduler may have to batch or aggregate control messages.
+
+In the single node setting, the scheduler can play a big role in query processing on heterogenous hardware.
+An example of such system can be a server configured with an FPGA or a GPU.
+If the scheduler can understand the strengths and weaknesses of each hetereogenous hardware component, it can route work orders to different components appropriately. 
+A key challenge in this problem is to understand the memory access costs for different hardware components and thus estimating the cost of executing operations.
