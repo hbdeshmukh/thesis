@@ -19,7 +19,7 @@ predicate over-approximation scheme. Quickstep also uses cache-efficient filter 
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.75\textwidth]{system/figures/tpch-q10-waterfall.pdf}
+	\includegraphics[width=0.45\textheight]{system/figures/tpch-q10-waterfall.pdf}
 	\caption{\textbf{A waterfall chart showing the impact of various techniques in Quickstep for query 10 from the TPC-H benchmark running on a 100 scale factor database. RS (Row Store), and CCS (Compressed Column Store) are both supported in Quickstep (see Section~\ref{block-structure}). Basic and Selection are template metaprogramming optimizations (described in Section~\ref{vectorization}), which relate to the efficiency of predicate and expression evaluation. LIP (Lookahead Information Passing, described in Section~\ref{sec:lip}) is a technique to improve join performance. Starting with a configuration (Basic + RS), each technique is introduced one at a time to show the individual impact of each technique on this query.}}
 	\label{fig:tpch-q10-waterfall}
 \end{figure}

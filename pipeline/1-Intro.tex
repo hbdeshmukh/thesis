@@ -1,0 +1,56 @@
+\chapter{Revisiting Pipelining in In-memory Databases}\label{chap:pipeline}
+
+\section{Introduction}
+In database systems data are often streamed between two physical relational operators (producer and consumer operators).
+The producer operator processes input data and some or all the input data may be passed on as its output. 
+This output in turn becomes the input for the consumer data. 
+This method of passing data is referred to as pipelining.
+
+We take a renewed look at the pipelining problem in the in-memory settings for analytical queries such as TPC-H~\cite{tpc-h}.
+Given a hash based implementations of join algorithms, a common kind of pipeline found in many query plans is made up of selection operator and probe (join) operator.
+Next, we describe some common characteristics of pipelined query processing. 
+Materialization is not required within a pipeline, which provides two benefits: first, the time to write the temporary output is saved.
+Second, if the temporary output is large, pipelining lowers the memory overhead of the query processing.
+However for pipelining in multi-join queries with chains of select operator and probe operators, all hash tables need to be built even before the execution starts in the pipeline.
+Thus, pipelining could incur memory pressure.
+
+In traditional disk-based database systems, pipelining plays an important role.
+Data movement from memory to disk is expensive, so avoiding data movement to the disk can give significant performance improvement.
+
+We revisit the notion of pipelining in the in-memory settings, where memory is usually available in abundance. 
+The memory-disk hierarchy in traditional disk based systems shifts to cache-memory hierarchy.
+Given this shift, we ask a question: is pipelining for in-memory setting as important as the disk setting?
+To answer this question, we compare the performance of pipelining execution strategy to a non-pipelining execution strategy in a variety of scenarios.
+The pipelining and non-pipelining strategies are similar w.r.t the data that is materialized at the end of each operator. 
+However they differ in terms of the \textit{eagerness} with which the output of the producer is processed by the consumer.
+We examine the impact of various factors on the relative performance of these two strategies including number of threads, block size, storage format of the tables, and hardware prefetching.
+
+Surprisingly, we observe that the performance gap between pipelining and non-pipelining strategies is not high.
+Individually, some queries benefit from pipelining where as for others there is no benefit.
+Why does pipelining, which is so useful in disk settings does not seem to have a lot of impact in the in-memory setting?
+We present two conclusions based on our observations.
+
+Our first conclusion is that the impact of pipelining on queries is not uniform. 
+Some queries are impacted more than others. 
+We point out that some queries consist of dominant operators where majority of the query execution time is spent. 
+In the presence of such dominant operators, pipelining makes little or no impact on the overall query execution time. 
+Even though our analysis uses TPC-H queries, this conclusion should be broadly applicable. 
+
+Our second conclusion highlights an important parameter that can benefit performance of pipelining specifically in the in-memory settings.
+That parameter is the scalability of an operator, which refers to its performance as the number of threads (or degree of parallelism) working on that operator concurrently.
+We note that in the pipelining implementation, the degree of parallelism of the operators in the pipelining is lower than that in the non-pipelining implementation. 
+If an operator in the pipeline has scalability issues (which may arise because of the implementation of the operator), by having a lower DOP, pipelining can mask the scalability issues.
+Our evaluation shows that the DOP aspect helps improve performance of the pipelining strategy significantly in some queries.
+
+These findings help us understand the intrinsics of a pipeline. 
+However a query plan is typically made up of several pipelines connected to each other.
+In query plans that are not left-deep (or right deep), sometimes it is not clear how to sequence the pipelines for execution.\todo{Add a sample query plan and list down possible sequences.}
+There may be several possible sequences and each bearing different performance characteristics.
+To this end, we present a pipeline sequencing algorithm.
+Given a query plan DAG, our algorithm outputs a sequence of pipelines for execution. 
+We present two variants of this algorithm depending on the availability of the memory -- one when memory is plentiful and another when memory is limited.
+Our experimental evaluation shows that the sequencing algorithm often produces the pipeline sequences with the optimal performance in a variety of scenarios. 
+
+Our paper is organized as follows: Section~\ref{sec:pipe-background} describes the background about pipelining in database systems.
+We describe our pipeline sequencing algorithm in Section~\ref{sec:pipe-seq-algo}.
+In Section~\ref{sec:experiments}, we present the experimental evaluations and report our findings.

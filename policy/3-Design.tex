@@ -97,7 +97,7 @@ Next, we study the methodology used by the Learning Agent.
 \subsubsection{Learning Agent Methodology}
 %The Learning Agent builds each query's \textit{execution profile} based 
 %on the execution statistics of recently completed work orders for that query.
-The Learning agent uses the execution times of previously executed work orders 
+The Learning agent uses the execution times of previously executed work orders\\
 ($t_{w_{1}}, t_{w_{2}}, \ldots, t_{w_{k}}$) to predict the execution time of 
 the next work order ($t_{w_{k+1}}$) for a given query.\footnote{In the beginning of a query execution, when enough information about work order execution times is not available, we use the default probabilities in the Policy Enforcer, instead of using default predicted times in the Learning Agent.}
 Figure~\ref{fig:scheduler-cycle} shows the Learning Agent's interaction with other scheduler components.

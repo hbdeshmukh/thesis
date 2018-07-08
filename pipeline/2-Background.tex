@@ -1,0 +1,71 @@
+\section{Pipelining Background}\label{sec:pipe-background}
+In this section we present the background about pipelining in database systems. 
+
+A simplest pipeline of relational operator consists of two operators: A producer operator and a consumer operator. 
+The output of the producer operator can be passed (or \textit{streamed}) to the consume operator. 
+An example of such a simple pipeline can be a hash based join. 
+If there's a selection on the probe side, the selection operation and the subsequent probe operation can form a pipeline (assuming the hash table is already built).
+
+Deeper pipelines may consist more than two operators, such that any two adjacent operators can form a producer and consumer pair.
+Data from the original producer operator can be passed all the way to the last operator in the pipeline. 
+An example of such deep pipeline could be a left-deep plan for a multi-way join query.
+
+A query plan can be viewed as set of connected pipelines. 
+Certain operators are pipeline-breakers which means data cannot be streamed beyond the pipeline breaking operator. 
+
+There are two aspects about pipelining: \textit{Materialization} (or the lack of) and \textit{eager} execution of consumer operator on the output of the producer operator. 
+Note that various systems may have different representations for the temporary data, which is the output of a producer operator. 
+Systems such as MonetDB~\cite{monetdb} and \sys{} that operate with the block-style processing model fully materialize the output. 
+Vectorwise~\cite{vectorwise} has a compact representation of the intermediate output and does not fully materialize the ouptut.
+Systems such as Hyper~\cite{hyper}, LegoBase~\cite{legobase} generate compiled code for the full pipeline, therefore they do not need to have a representation for the temporary data.
+
+There's been a lot of prior work on pipelining.
+Most recently Wang et al.~\cite{wang2016elastic} proposed an iterator model for pipelining in in-memory database clusters.
+Their key idea is to provide flexibility in the traditional iterator through operations such as expand and shrink.
+Neumann~\cite{DBLP:journals/pvldb/Neumann11} proposed compilation techniques for query plans, which is used by Hyper~\cite{hyper, morsel}. 
+As we mentioned earlier, query compilation is one of the techniques for realizing pipelining in a query plan. 
+Vectorwise~\cite{vectorwise} pioneered the vectorized query processing model through the hyper-pipelining query execution~\cite{BonczZN05}.
+Breaking up from the traditional tuple-at-a-time processing model, Vectorwise used batches (or vectors) of tuples. 
+These batches could be amenable to parallel SIMD instructions and thus could provide greater speedups over Vectorwise's predecessor MonetDB~\cite{monetdb}.
+
+Menon et al. propose Relaxed Operator Fusion model~\cite{rof} that puts together techniques like compilation, vectorization and software prefetching in a single query processing engine Peloton~\cite{pelotondb}. 
+
+Zhu et al. propose look ahead techniques to increase robustness of query plans~\cite{zhu2017looking} in the Quickstep system~\cite{quickstep-vldb}.
+Their key technique is to minimize the data that passes from the producer operator to the consumer operator in a pipeline through the help of bloom filters.
+
+Work sharing across queries has been studied extensively ~\cite{DBLP:conf/sigmod/HarizopoulosSA05, DBLP:conf/vldb/ZukowskiHNB07}.
+Scan sharing has shown to have significant improvements in query performance, especially in the disk-setting.
+Such sharing typically happens for the selection operation on large tables (e.g. lineitem in TPC-H schema), which in many query plans is the starting point of a pipeline. 
+
+Given the wide variety of the related work in this domain, we now concretely describe the scope of our work.
+In the in-memory single node setting on systems that use the block-based query processing, we examine the gap between pipelining and non-pipelining execution strategies. 
+The two strategies behave similarly w.r.t how they materialize the intermediate output.
+They differ based on how eagerly the intermediate data is consumed by the producer operator. 
+In the pipelining strategy, the intermediate data is consumed \textit{eagerly}, i.e. as soon as it is produced.
+In the non-pipelining strategy, the intermediate data is consumed \textit{lazily}, i.e. after all the tasks of the producer are complete.
+
+%We focus on two aspects: First, whether the input to an operator is hot and second, prefetching. 
+%Next, we discuss the hotness of input factor.
+%
+%\subsection{Hotness of input}
+%The input to the probe work order is the output of the selection $\sigma$(R) and the hash table. 
+%In the pipelining strategy, the input $\sigma$(R) is likely to be hot in the last level cache when the probe work order is scheduled. 
+%Therefore we expect the last level cache efficiency of the probe work order to be better in the pipelining strategy than that in the no-pipelining strategy.
+%
+%\subsection{Data Prefetching}
+%Processors use a technique called cache prefetching through which data are brought to the caches (prefetched) anticipating its need in the future. 
+%Prefetching can be performed by the hardware or software.
+%Software prefetching is achieved by explicitly inserting prefetch instructions in the code. 
+%
+%There are two kinds of hardware prefetching: temporal and spatial~\cite{hardware-prefetching}. 
+%Temporal prefetching is associated with cases when the same data are accessed repeatedly.
+%Spatial prefetching is performed when a sequential access pattern is likely. 
+%When a block $i$ is accessed, its neighbor block $i + 1$ is prefetched.
+%
+%We are interested in spatial data cache prefetching.
+%For selection operation that has a sequential access pattern such a prefetching could be useful .
+%
+%In the pipelining implementation, during selection work order execution, the L3 cache is likely to prefetch another R block (denoted by $\spadesuit$ in Table~\ref{table:pipe-vs-nopipe}).
+%Such a prefetching work may be wasteful, if the next work order that gets scheduled is a probe work order. 
+%Similar prefetching also happens in the no-pipelining strategy (denoted by \# in Table~\ref{table:pipe-vs-nopipe})), which is not likely to be wasted.
+%This is because in the no-pipelining strategy, probe work orders do not overlap with selection work orders.

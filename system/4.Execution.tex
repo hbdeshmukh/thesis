@@ -79,7 +79,7 @@ we first describe the work order abstraction and provide a few example work orde
 
 \begin{figure}
 \centering
-   \includegraphics[width=.5\textwidth]{system/figures/physical-plan.pdf}
+   \includegraphics[width=.35\textheight]{system/figures/physical-plan.pdf}
    \caption{\textbf{Plan DAG for the sample query}}
    \label{fig-dag}
 \end{figure}
@@ -163,29 +163,28 @@ During concurrent execution of the queries, the load controller can control the 
 
 \begin{figure*}[t]
 \centering
-\begin{subfigure}[bt]{0.33\textwidth}
+\begin{subfigure}[bt]{0.3\textwidth}
   \centering
-   \includegraphics[width=1.0\columnwidth,
-                    height=0.75\columnwidth]{system/figures/Q41-original.pdf}
+   \includegraphics[width=1.0\textwidth,
+                    height=0.75\textwidth]{system/figures/Q41-original.pdf}
    \caption{Original query plan}
    \label{fig-q41-original}
 \end{subfigure} %
-\begin{subfigure}[bt]{0.33\textwidth}
+\begin{subfigure}[bt]{0.3\textwidth}
   \centering
-   \includegraphics[width=1.0\columnwidth,
-                    height=0.75\columnwidth]{system/figures/Q41-semijoin.pdf}
+   \includegraphics[width=1.0\textwidth,
+                    height=0.75\textwidth]{system/figures/Q41-semijoin.pdf}
    \caption{Plan using join to semi-join transformation}
    \label{fig-q41-semijoin}
 \end{subfigure} %
-\begin{subfigure}[bt]{0.33\textwidth}
+\begin{subfigure}[bt]{0.3\textwidth}
   \centering
-   \includegraphics[width=1.0\columnwidth,
-                    height=0.75\columnwidth]{system/figures/Q41-LIP.pdf}
+   \includegraphics[width=1.0\textwidth,
+                    height=0.75\textwidth]{system/figures/Q41-LIP.pdf}
    \caption{Query plan using LIP (only)}
    \label{fig-q41-lip}
 \end{subfigure} %
 \caption{\textbf{Query plan variations for SSB Query 4.1}}
-\vspace*{2em}
 \end{figure*}
 
 Finally, we note that by simply tracking the work orders that are completed, Quickstep can provide a built-in generic query progress monitor (shown in Section~\ref{sec:progress-monitoring}).

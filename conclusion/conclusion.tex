@@ -13,7 +13,7 @@ Through our experimental evaluation, we show that the intra-operator and inter-o
 The work order abstraction is instrumental for realizing intra-operator parallellism.
 Comparison with other systems also show that Quickstep is faster than other systems, often by orders of magnitude. 
 
-In Chapters~\ref{chap:policy} and Chapter\todo{add-pipelining-chapter}, we show that the scheduler can be used to meet multiple objectives.
+In Chapters~\ref{chap:policy} and Chapter~\ref{chap:pipeline}, we show that the scheduler can be used to meet multiple objectives.
 In Chapter~\ref{chap:policy} we use the scheduler for the problem of resource governance.
 We specifically target the problem of allocating resources such as CPU to concurrent queries according to well defined policies.
 A key challenge in this problem is the fluctuation in the resource requirements of a query.
@@ -24,7 +24,7 @@ We form a close loop between scheduling decisions and the learning, where the le
 The adjusted probabilities result in change in the resource allocation, leading the system closer to meeting the high level policy goals.
 Our experimental evaluation shows that Quickstep scheduler can meet the goals for a variety of policies including fair and priority-based. 
 
-Chapter\todo{add-pipelining-chapter} uses the scheduler for the performance objective.
+Chapter~\ref{chap:pipeline} uses the scheduler for the performance objective.
 Here we analyze the role of pipelining in the in-memory settings. 
 We cast pipelining as a schedule in which consumer tasks (or work orders) are interleaved with the producer tasks. 
 We compare pipelining with a non-pipelining strategy in which the said interleaving is not present. 
