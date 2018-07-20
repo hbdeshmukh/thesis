@@ -1,7 +1,7 @@
 % !TEX root = scheduler.tex
 \section{Background}\label{sec:background}
 In this section we establish some prerequisites for the proposed Quickstep scheduler framework.
-\sys{}~\cite{quickstep} is an open-source relational database engine 
+\sys{}~\cite{quickstep-vldb} is an open-source relational database engine 
 % and SQL as its query language.  \sys{} 
 designed to efficiently leverage contemporary hardware aspects such as large main memory, multi-core, and multi-socket server settings. 
 %The system aims to deliver high performance in read-mostly data warehousing 
@@ -18,7 +18,94 @@ The scheduler runs as a separate thread and coordinates the execution of all que
 Apart from the scheduler, \sys{} has a pool of worker threads that carry out computations on the data. 
 
 \sys{} uses a query execution paradigm (built using previously proposed approaches~\cite{qsstorage,morsel}), in which a query is executed as a sequence of \textit{work orders}. 
-A work order operates on a data block, which is treated as a self-contained mini-database~\cite{qsstorage}.  (c.f.~\cite{supplement} for examples of work orders)
+A work order operates on a data block, which is treated as a self-contained mini-database~\cite{qsstorage}.  (c.f. Section~\ref{sec:workorders} for examples of work orders)
 The computation that is required for each operator in a query plan is decomposed into a sequence of work orders. 
 For example, a select operator produces as many work orders as there are blocks in the input table. 
-\sys{}'s work order abstraction is tied with its storage management, which we describe in~\cite{supplement}.
+We first describe the storage management in \sys{} in Section~\ref{sec:storage-manager}.
+\sys{}'s work order abstraction (described in Section~\ref{sec:workorders}) is tied with its storage management (described in Section~\ref{sec:storage-manager}).
+
+\section{Storage Management in \sys{}}\label{sec:storage-manager}
+Data organization in the \sys{} storage manager holds the key to intra-query 
+parallelism~\cite{qsstorage}. 
+Data in a relation are organized in the form of blocks. 
+Each block holds a collection of tuples from a single table. 
+A unique aspect of the storage organization in \sys{} is that blocks are considered to 
+be independent and self-contained mini-databases. 
+Thus, when creating an index, instead of creating a global index with 
+``pointers'' to the tuples in blocks, the index fragments are stored within the blocks. 
+Each block is internally organized into \textit{sub-blocks}. 
+There is one \textit{tuple storage sub-block}, which could be in a row store or a 
+column store format.
+%\reminder{Should we add more formats like compressed column store etc?}. 
+In addition, each block has one sub-block for each index created on the table. 
+CSB+-tree~\cite{csb+-tree} and BitWeaving~\cite{bitweaving} 
+indices are currently supported. 
+The blocks are free to self-organize themselves and thus a given table may have blocks in different formats. 
+For example, new blocks in a table may be in a row store format, while older blocks may 
+be in a column store format.
+%The block size is configurable %(in fact blocks in the same table can be of 
+%%different sizes), %and the recommended block size is 4 MB.
+
+This storage block design, as articulated earlier in~\cite{qsstorage} enables the query execution to be broken down into a set of independent tasks on each block. 
+This is a crucial aspect that we leverage in the design of our scheduler. 
+
+The storage manager also contains a \textit{buffer pool manager}. 
+It organizes the memory as an array of slots, and overlays blocks on top of the slots (so block sizes are constrained to be a multiple of the underlying slot size). 
+Memory allocations for data blocks for \textit{both} permanent and temporary tables are always made from a centralized buffer pool. 
+In addition, all allocations for run-time data structures, such as hash tables are also made 
+by the buffer pool. 
+The buffer pool manager employs an LRU-2 replacement policy. 
+Thus, it is possible for a hash table to get evicted to disk, if it has become ``cold''; e.g. if it belongs to a suspended query.
+
+
+\section{Work Orders}\label{sec:workorders}
+Work done for executing a query in \sys{} is split into multiple \textit{work 
+	orders}. %, as highlighted in Section~\ref{sec:background}. 
+A work order contains all the information that is needed to process tuples in a given 
+data block. 
+A work order encapsulates the relational operator that is being applied, the relevant 
+input relation(s), location of the input data block, any predicate(s) to be 
+applied on the tuples in the input block, and descriptors to other run-time 
+structures (such as hash tables).
+%The input data location is specified in terms of a unique storage block ID, a join hash table identifier, or an aggregation hash table identifier. 
+%In NUMA settings, a work order can also provide a preferred site for execution in the 
+%form of a NUMA socket ID. 
+%The scheduler then uses this information to make a 
+%\textit{data-locality aware} scheduling decision. \reminder{Should we remove NUMA 
+%because there are no experiments?}
+
+Consider the following full table scan query to illustrate the work order concept:
+
+\begin{lstlisting}[language=SQL, 
+basicstyle=\ttfamily\small, 
+showstringspaces=false,
+keywordstyle=\color{cardinal}\bfseries, 
+emph={San,Diego}, 
+emphstyle=\color{bondiblue}\bfseries]
+SELECT name FROM Employee WHERE city=`San Diego'
+\end{lstlisting}	
+\vspace{-0.4em}
+
+The plan for this query has a simple \textit{selection} operator.  
+For the selection operator, the number of work orders is same as the number of input blocks in the \verb+Employee+ table. 
+Each selection work order contains the following information:
+\begin{itemize}
+	\itemsep0.1em
+	\item {Relation: \verb+Employee+, attribute: \verb|name|}
+	\item {Predicate: \lstinline[language=SQL, 
+		basicstyle=\ttfamily\small, 
+		keywordstyle=\color{cardinal} \bfseries,
+		emph={San,Diego}, 
+		emphstyle=\color{bondiblue}\bfseries]|city=`San Diego'|}
+	\item {The unique ID of an input block from the \verb+Employee+ table}
+\end{itemize}
+
+The work orders for a join operation %(illustrated below) 
+are slightly more complicated. 
+For example, a \textit{probe work order},  contains the unique ID of the probe 
+block, %(as described in Section~\ref{ssec:storage-manager}, a hash table is stored in a block in the buffer pool), build and probe relations, 
+a pointer to the hash table, the projected attributes, and the join predicate.
+Each operator algorithm (e.g. a scan or the build/probe phase of a hash-join) 
+in the system has a C++ class that is derived from a root abstract base class that has a virtual method called \verb|execute()|.
+Executing a work order simply involves calling the \verb|execute()| method 
+on the appropriate operator algorithm C++ class object. 

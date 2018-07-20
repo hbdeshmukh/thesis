@@ -10,7 +10,8 @@ the \textit{Work Order Container} to track all the work orders that are ready fo
 scheduling. 
 Recall from Section~\ref{sec:background}, a description of the work carried out on a block of data is a \textit{work order}. 
 The Query Manager generates schedulable work orders for each active operator node in the DAG. 
-It also runs a rudimentary DAG traversal algorithm (described in~\cite{supplement}) to determine when to activate nodes in the DAG. 
+It also runs a rudimentary DAG traversal algorithm to determine when to activate nodes in the DAG. 
+The algorithm is decribed in Appendix~\ref{apx:DAG-algo}.
 
 \begin{figure}[]
 	\centering
@@ -37,7 +38,7 @@ responsible for ensuring that the system has enough resources to meet the
 demands.
 A new query in the system presents its resource requirements for its lifetime in the form of a \textit{Resource Map} to the Load Controller.
 %The estimates provided in the Resource Map can come from the query optimizer or some other mechanism, which is irrelevant to the scheduler.
-A sample resource map is presented in~\cite{supplement}.
+A sample resource map is presented in Appendix~\ref{apx:resource-map}.
 
 The Load Controller determines the fate of a new query. 
 If enough resources are available, it admits the query.
@@ -59,10 +60,36 @@ It receives work orders that are ready for execution from the Policy Enforcer, a
 The Foreman can monitor the number of pending work orders for each worker, and 
 use that information for load-balancing when dispatching work orders.
 Upon completion of the execution of a work order, a worker sends execution statistics to the Foreman, which are further relayed to the Policy Enforcer.
-New work orders due to pipelining are generated similarly (these details are presented in~\cite{supplement}).
+New work orders due to pipelining are generated similarly (more details on pipelining can be found in Chapter~\ref{chap:pipeline}). 
+We describe \sys{}'s thread model in the next section. 
 
-\sys{} has two kinds of threads -- a \textit{scheduler} thread and many \textit{worker} threads that perform the actual relational operations as defined by \textit{work orders}. 
-More details about the thread model can be found in~\cite{supplement}.
+\section{Thread Model}\label{sec:thread-model}
+\sys{} currently runs as a single server process, with multiple user-space threads. 
+There are two kinds of threads. 
+There is one \textit{Scheduler} thread, and a pool of \textit{Worker} threads. 
+All the components in the scheduler architecture except the worker thread pool run in the 
+scheduler thread. 
+In the current implementation, all threads are spun upfront when the database server 
+process is instantiated, and stay alive until the server process terminates.
+
+The threads use the same address space and use shared-memory semantics for data 
+access. 
+In fact the buffer pool is stored in shared memory, which is accessible by all the threads. 
+Each worker thread is typically pinned to a CPU core. 
+Such pinning avoids costs incurred when a thread migrates from one CPU core to another, which results in loss of data and instruction cache locality. 
+We do not pin the scheduler thread, as its CPU utilization is low and it is not worth dedicating a CPU core for the scheduler thread.
+
+Every worker thread receives a work order from the Foreman, executes it and then waits for the next work order.
+In order to minimize worker's idle time, typically each worker is issued multiple work 
+orders at any given time. 
+%When a work order is sent to a worker thread, it executes the work order.
+%the worker thread simply invokes %the appropriate \verb|execute()| method (described in~\ref{ssec:workorders}). 
+Thread-safe queues are used to communicate between the threads.
+The communication happens through light-weight messages from the sender to the receiver thread, which is internally implemented as placing a message object on the receiver's queue. 
+A receiver reads messages from its queue. 
+A thread (and its queue) is uniquely identified by its thread ID. 
+
+The thread communication infrastructure also implements additional features like the ability to query the lengths of any queue in the system, and cancellation of an unread message. 
 
 \subsection{Policy Enforcer}\label{ssec:policy-enforcer}
 The Policy Enforcer assigns a probability value to each active query in the system. 
@@ -83,7 +110,7 @@ This predicted execution time is used to compute the probability assigned to eac
 
 An alternative to the Learning Agent could be a static method that assigns fixed probability values to active queries in the system. 
 We now justify the need for the Learning Agent and highlight the limitations of the alternative mentioned above.
-An illustrative example is presented in~\cite{supplement}.
+An illustrative example is presented in~\ref{apx:learning-motivation}.
 
 The time per work order metric doesn't stay the same throughout a query's lifetime, for reasons such as variations in input data (e.g. skew), CPU characteristics of different relational operators (e.g. scan vs hash probe).
 In each phase of the query, the time per work order is different.
@@ -94,6 +121,7 @@ To make things more complicated, queries can enter or leave the system at any ti
 Therefore, it is difficult to statically pick a proportion of CPU to allocate to the concurrent queries. 
 Hence there is a need to ``learn'' the various phases in the query execution and dynamically change the proportion of resources that are allocated to each query, based on each query's phase.
 Next, we study the methodology used by the Learning Agent.
+
 \subsubsection{Learning Agent Methodology}
 %The Learning Agent builds each query's \textit{execution profile} based 
 %on the execution statistics of recently completed work orders for that query.
@@ -117,10 +145,10 @@ The set of previously executed work orders can belong to multiple relational ope
 The Learning Agent stores the execution times of the work orders grouped by their source relational operator, e.g. the execution statistics of select work orders are maintained together and kept separate from those of aggregation work orders. 
 
 %A prediction model is used to estimate the execution time of future work orders. 
-\sys{}'s scheduler currently uses linear regression as the prediction model.
+\sys{}'s scheduler currently uses linear regression (specifically autoregression, which is a smaller class of linear regression) as the prediction model.
 We chose linear regression as it is fast, accurate, and efficient w.r.t. the computational and the storage requirements of the model. 
 %(New models can be easily added using an abstraction mechanism.) 
-More details about our use of linear regression is described in~\cite{supplement}.
+More details about our use of linear regression is described in~\ref{apx:linear-regression-usage}.
 
 The problem of estimating the query execution time is well-studied, but requires complex methods~\cite{duggan2011performance, wu2013towards, li2012gslpi, 
 chaudhuri2004estimating}. 

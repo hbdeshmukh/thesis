@@ -28,8 +28,8 @@ force:
 clean:  
 	$(LATEXMK) -C $(MAIN)
 	rm -f $(MAIN).pdfsync
-	rm -rf *~ *.tmp
-	rm -f *.bbl *.blg *.aux *.end *.fls *.log *.out *.fdb_latexmk
+	rm -rf *~ *.tmp 
+	rm -rf *.bbl *.blg *.aux *.end *.fls *.log *.out *.fdb_latexmk
 
 once:  
 	$(LATEXMK) $(LATEXMKOPT) -pdflatex="$(LATEX) $(LATEXOPT) %O %S" $(MAIN)
