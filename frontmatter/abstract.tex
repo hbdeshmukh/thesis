@@ -20,4 +20,5 @@ Our experiments demonstrate that we are able to meet the goals as per the policy
 In the final chapter, we highlight the impact of scheduling techniques on individual query performance.
 We turn to pipelining, which is a well known query processing technique, used since the times of disk-based systems.
 We revisit the importance of pipelining in the in-memory systems and examine the role of various parameters such as block size, parallelism, storage format and hardware prefetching.
-For queries with complex query plans, we also provide a pipeline sequencing algorithm so as to efficiently process the pipelines and complete the query execution. 
+We find that the performance of queries with and without pipelining does not differ as radically as it does in the disk-based environment.
+We explain the reasons for this similarity of performance between strategies through empirical evaluation as well as an analytical model.
