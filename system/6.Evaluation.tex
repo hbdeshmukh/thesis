@@ -240,8 +240,12 @@ The use of a column store format leads, unsurprisingly, to higher performance ov
 The simpler Q1.Y queries show far bigger improvements as the input table scan is a bigger proportion of the query execution time. The other queries spend a larger fraction of their time on joins, and passing tuples between the join operations. Consequently, switching to a column store has a less dramatic improvement in performance for these queries.
 
 An interesting note is that the impact of column stores here is  smaller than previous comparisons~\cite{AbadiMH08} which have compared these approaches across two different systems and showed about a 6X improvement for column-stores. Overall, we see a 2X improvement for column-stores, which is lower than these previous results.
+One key reason for the lower improvement is because column stores typically help speed up scans (select operators).
+However query plans are often complex with several different types of operators. 
+Thus while considering overall query execution time, selection forms one fraction of the overall time distribution. 
 
-We have also experimented with compressed column-stores in this same setting, and find that they are slower than non-compressed column stores. Compressed column stores are still faster than row store by about 50\% overall. But compression adds run-time CPU overhead which reduces is overall performance compared to regular column stores. (In the interest of space we do not present the detailed results.)
+We have also experimented with compressed column-stores in this same setting, and find that they are slower than non-compressed column stores. Compressed column stores are still faster than row store by about 50\% overall. But compression adds run-time CPU overhead which reduces is overall performance compared to regular column stores. 
+(In the interest of space we do not present the detailed results.)
 
 The results for TPC-H are similar, and omitted in the interest of space.
 
