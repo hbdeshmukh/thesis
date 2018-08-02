@@ -1,0 +1,15 @@
+\begin{abstract}
+Pipelining is crucial mechanism that is used to coordinate the data flow across two relational operators in a query plan.
+If two relational operators are connected through a non-blocking edge, data can be pipelined from the producer operator to the consumer operator. 
+In disk-based systems, pipelining plays a big role as it saves the I/O cost of data movement from memory to disk. 
+As in-memory database systems gain more traction, a key change is switching from focusing from the memory--disk hierarchy to the processor cache--memory hierarchy. 
+Does this shift, require rethinking pipeline? This is the key question that we consider in this paper, and in the setting of analytic query processing. 
+
+%\reminder{Do we have a first-principles approach to thinking about pipelining?}
+First, we step back and take a careful look at what makes pipelining so crucial in traditional database systems. 
+Then, we compare pipelining and non-pipelining query processing strategies for in-memory settings, using TPC-H queries. First we notice that pipelining must be considered holistically with other system design issues, such as degree of inter and intra operator parallelism, and the block/page size. From this holistic perspective, surprisgly perhaps, pipelining is not very critical for in-memory databases. The impact of pipelining is also lower for data stored in a columnar format. The query structure also plays a crucial role, and in some cases not pipelining can be higher perfomant. 
+%Furthermore, in complex plans that is composed of several several pipelines, differnt sequences of pipelines can be possible in order to execute a complex query plan. For this latter part, we propose a maximal pipeline sequencing algorithm that produces a sequence of pipelines that can give optimal performance. \reminder(by how much and over what method?)
+
+Collectively, our results point to the far reduced role for pipelining for in-memory analytic query processing, and thus argues that modern systems may want to downplay the use of pipeline as it often a harder mechanism to implemnent than non-pipelining implementaion.
+
+\end{abstract}

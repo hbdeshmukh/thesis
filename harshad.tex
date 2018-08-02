@@ -57,9 +57,25 @@
 
 \usepackage{pifont}
 \usepackage{array}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[geometry]{ifsym}
 
+\let\proof\relax 
+\let\endproof\relax
+\usepackage{amsthm}
+
+\newcommand{\sys}{Quickstep}
+\newcommand{\SYS}{QUICKSTEP}
+\newcommand{\wo}{work order}
+\newcommand{\Wo}{Work order}
 \newcommand{\todo}[1]{}
 \renewcommand{\todo}[1]{{\color{red} TODO: {#1}}}
+
+\theoremstyle{plain}
+\newtheorem{example}{Example}
+
+\definecolor{PlotOrange}{HTML}{FC8D59}
+\definecolor{PlotGreen}{HTML}{91CF60}
 
 % Fixes bibliography bug.
 \def\newblock{\hskip .11em plus .33em minus .07em}
@@ -68,7 +84,7 @@
 % vice versa, as they use different TOC file markups.
 
 \usepackage[hidelinks]{hyperref}
-\newcommand{\sys}{Quickstep}
+
 % 
 % \definecolor{links}{rgb}{0.5,0,0} 
 % \definecolor{cites}{rgb}{0,0.5,0} 

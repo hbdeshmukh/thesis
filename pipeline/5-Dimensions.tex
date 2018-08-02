@@ -1,0 +1,146 @@
+\section{Discussion of Dimensions}\label{sec:dimensions}
+In this section we discuss the various dimensions that we use for our analysis.
+Through our study, we would like to understand the impact of these dimensions on the performance of pipelining and non-pipelining strategies in the in-memory setting. 
+
+\subsection{Storage Format}
+To explore the relationship between pipelining performance and storage formats, we use two storage formats for our evaluation namely row store and column store.
+All the base tables in the TPC-H schema are stored in the same storage format.
+We use row store format for temporary tables irrespective of the storage format of the base tables.
+
+Column stores have shown to have higher performance for analytical workloads~\cite{DBLP:conf/sigmod/AbadiMH08}. 
+The difference between the performance of column store and row store format is most prominent for scan operators.
+Typically scans are faster with column store than in row store.
+In column store format, values of a given column are stored in contiguous memory region.
+Thus accessing a single column which has a sequential access pattern, results in a good cache behavior.
+
+In row store format, all columns of a tuple are stored together, thus accessing a particular column involves bringing unnecessary data (non-referenced columns) in the caches. 
+Recent studies~\cite{quickstep-system} have shown that the performance gap between column stores and row stores is not as high as shown in the prior work.
+Therefore we experiment with both storage formats for our comparison. 
+
+\subsection{Block Size}
+We start by explaning the concept of block size.
+As the producer operator processes the input, it materializes the output to a temporary block. 
+We let the temporary block to reach a threshold size (known as block size) and then pass the block to the consumer operator. 
+
+We would like to examine the impact of block size on the performance of the pipelining strategies. 
+Consider an example pipeline: select operator $\rightarrow$ probe hash table operator.
+A smaller block size in the pipelining strategy would mean that the block can potentially get filled quickly. 
+Therefore, compared to a larger block size, the probe tasks may be scheduled more frequently and each task itself may be shorter. 
+
+\subsection{Parallelism}
+Intra-operator parallelism is prevalent in many modern database systems~\cite{monetdb, morsel, quickstep-system, vectorwise}.
+Pipelining could be considered as a case of inter-operator parallelism, as in a pipeline multiple operators could be under execution simultaneously. 
+We would like to study the impact of parallelism on the relative performance of pipelining and non-pipelining.
+
+We define some terminologies that are relevant for our study in the context of concurrency.
+\textit{Degree of parallelism} (DOP) of an operator refers to the number of concurrent threads involved in executing \wo{}s of that operator. 
+The \textit{scalability} of an operator (using $T$ threads) is its performance with DOP as $T$ relative to its performance when DOP is 1.
+
+We now discuss the DOP behavior of operators in \sys{}.
+Recall from Section~\ref{ssec:system-scheduling} that \sys{} has a scheduler that dispatches \wo{}s  of relational operators to worker threads.
+In \sys{}, the pipelining strategy can result in a fluid DOP of operators.
+Consider the example from Figure~\ref{fig:pipelining-schedules}.
+Until there is enough input available to schedule a probe \wo{}, all worker threads operate on filter operator, thus the DOP of the filter operator is same as number of threads in the system.
+As soon as a probe \wo{} is generated it gets scheduled, at which time the DOP of the probe operator is 1.
+If multiple probe \wo{} are generated simultaneously, the DOP of the probe operator could be higher.
+
+In the non-pipelining strategy, the DOP of operators remains roughly the same.
+As shown in Figure~\ref{fig:pipelining-schedules} for the non-pipelining schedule, the DOP of select and probe operator remain maximum (equal to number of threads).  
+
+\subsubsection{Scalability}\label{sssec:scalability}
+In an ideal environment, adding more threads for an operator execution should offer linear speedup.
+The assumption being that each parallel \wo{} operates at the same speed and thus by executing more tasks concurrently, the overall execution time reduces proportionally. 
+
+Linear speedups for operators (or for queries as a whole) are not always possible.
+DeWitt and Gray~\cite{DBLP:journals/cacm/DeWittG92} propose reasons for less than ideal speedup such as startup costs, interference from concurrent execution and skew.
+We can extend some of their ideas to in-memory systems, though their analysis was targeted towards parallel databases. 
+For example in the in-memory settings, interference can come from various sources such as contention due to latches, and shared use of a common bandwidth like memory bandwidth or bandwidth for data movement across NUMA sockets.
+
+For an operator that exhibits poor speedup behavior, increasing its DOP beyond a limit degrades its performance.
+Specifically the execution time for each \wo{} of the operator increases. 
+We observe that poor speedup can potentially have contrasting impact on pipelining (positive) and non-pipelining (negative) strategies.
+The reason for such contrasting behavior is that the DOP of a consumer operator in a pipeline tends to be smaller in case of pipelining strategy; where as it is higher in the non-pipelining strategy.
+
+\subsection{Hardware Prefetching}
+Hardware prefetching is a technique used by modern hardware to proactively fetch data in caches by speculating its access in the future.
+The prefetcher observes patterns of data accesses from memory to caches and speculates the access of a data element in advance.
+Prefetching reduces the penalty of a cache miss and thus potentially improves performance.
+
+In addition to the hardware-based prefetching implementation, there are software-based techniques for prefetching.
+Software-based prefetching techniques have been studied to improve the performance of database operators (\cite{rof,  DBLP:conf/icde/ChenAGM04}).
+However we restrict ourselves to hardware-based prefetching, as we can observe the impact of hardware prefetcher without modifying the implementation of the relational operators in the system.
+
+There are two kinds of prefetching: spatial and temporal. 
+Spatial prefetching is relevant when there is a sequential access pattern. 
+For example, if a data element at position $i$ is accessed at time $t$, it is likely that at time $t + 1$, the data element at position $i + 1$ will be accessed.
+Thus the data element at position $i + 1$ can be prefetched to improve performance.
+Temporal prefetching is associated with repeated accesses of the same data element.
+
+For our study, we run the queries using pipelining and non-pipelining strategies in two scenarios: a) hardware prefetching is enabled (default behavior of the hardware) b) hardware prefetching is disabled (by setting bit 0 and 1 in Model-specific Register (MSR) at address 0x1A4) as disclosed by Intel~\cite{intel-prefetching}.
+
+\subsection{Pipeline Sequences}\label{ssec:pipeline-sequencing-algo}
+A query plan is composed of several pipelines that are connected to each other. 
+To execute a query, there are many possible permutations of such pipelines. 
+In order to compare query performance with and without pipelining, we need to make sure that both strategies use the same sequence.
+We present an algorithm that given a query plan, sequences them to generate a pipelining sequence that maximizes the opportunity for pipelining. 
+We call this algorithm MPS (Maximal Pipeline Sequence) Algorithm.
+%We now describe our algorithm for sequencing pipelines in a query plan. 
+
+We make the following assumptions for the use of our algorithm. 
+Only one pipeline gets executed at a time.
+Simultaneous execution of multiple pipelines could pollute the cache, thus making it harder to reason about performance.
+We assume a hash-based implementation of join algorithms.
+A logical join operation has corresponding two physical operators: a build operator that builds the hash table and a probe operator that lets the input probe the hash table.
+The probe operator does not begin its execution until the build operator's execution is over.
+Each pipeline has a unique ID. 
+Unless specified, we assume that there is enough memory available to execute a query. 
+
+%If (node.name() == SELECT) {
+%		Return node.id();
+%}
+%If (node.name() == BUILD) {
+%	Return GetSequence(node.inputNode()) + node.ID();
+%}
+%If (node.name() == PROBE) {
+%		Return GetSequence(node.buildNode()) + 
+%GetSequence(node.inputNode()) + node.ID();
+%	}
+
+
+\begin{algorithm}
+	\caption{Pipeline Sequencing Algorithm}
+	\begin{algorithmic}[1]
+		\Function{GetSequence}{Operator op}
+		\If {op.name() == {\tt select}}
+		\State \Return op.ID();
+		\EndIf
+		\If {op.name() == {\tt build}}
+		\State \Return  GetSequence(op.inputOp()) + op.ID();
+		\EndIf	
+		\If {op.name() == {\tt probe}}
+		\State \Return  GetSequence(op.buildOp)) + GetSequence(op.inputOp()) + op.ID();
+		\EndIf	
+		\EndFunction		
+			
+	\end{algorithmic}
+	\label{alg:pipeline-sequence}
+\end{algorithm}
+
+Algorithm~\ref{alg:pipeline-sequence} describes the MPS algorithm and it is a variation of depth first traversal. 
+The key heuristics behind the algorithm is to construct the hash tables for the join early and facilitate the pipelining for the probing, by delaying the execution of the probe operator.
+There are two kinds of inputs for a probe operator - the probe relation and the hash table.
+By nature, the accesses within the hash table are random, where as the access pattern for the probe relation is sequential. 
+Therefore during the probe operation we prefer probe relation being hot in caches, as opposed to the hash table being hot.
+
+The function \textsc{getSequence} produces a sequence of pipelines in a recursive manner.
+We describe rules for each kind of operator such as \texttt{select}, \texttt{build}, and \texttt{probe}.
+Each rule determines the position of the given operator w.r.t to the sequence generated by the subtree rooted at this operator.
+For example, a \texttt{select} operator terminates the pipeline sequence, or a \texttt{build} operator appends itself before its subtree.
+
+%Given a pipeline that has multiple incoming pipelines, which pipeline should be executed earlier?
+%To answer this question, we sort the incoming pipelines using a custom comparator described in the function \textsc{pipelineComparator} in Line~\ref{alg:comparator}.
+%The \textit{smaller} pipeline is executed earlier. 
+%We now describe the sorting criterion.
+%As mentioned earlier, we want the build hash operator to execute sooner, therefore we treat them \textit{smaller}, as compared to the pipelines ending with a non-build hash operator.
+%In case of multiple incoming pipelines ending with build hash operator (Line~\ref{alg:break-ties}), we break the ties by declaring the pipeline with a smaller ID as smaller.
+%\todo{Show an example.}

@@ -1,0 +1,32 @@
+\section{Summary of Experiments}\label{sec:experiment-summary}
+We have described a large number of experiments in Section~\ref{sec:experiments} on queries from the TPC-H benchmark.
+In this section, we summarize our findings and connect our results back to the original dimensions (c.f. Section~\ref{sec:dimensions}) we used for our analysis.
+Recall that our focus is to understand the relative performance of pipelining strategy compared to a non-pipelining strategy.
+
+Our high level conclusion is that in the in-memory setting, for systems using block-based architecture, the performance of pipelining and non-pipelining strategy is similar.
+We now discuss the impact of individual dimensions.
+
+\paragraph*{\textbf{Block size}}
+We find that a higher block size bridgest the gap between pipelining and non-pipelining. 
+A larger block size results in a lower degree of parallelism for operators in a pipeline and thus also aides those operators that suffer from poor scalability. 
+A too large block size however can cause memory fragmentation.
+It may also result in a very low DOP such that CPU cores are left underutilized. 
+
+\paragraph*{\textbf{Parallelism}}
+Parallelism can affect the performance of pipelining and non-pipelining strategy in different ways. 
+We saw in Section~\ref{sssec:parallelism-effect}, how a poorly scalable operator can benefit the performance of pipelining strategy, where as it can adversely impact the performance of pipelining strategy.
+
+\paragraph*{\textbf{Storage Format}}
+The gap between pipelining and non-pipelining performance is largely unaffected by the choice of storage format for the base tables.
+We note that individually some queries execute faster when run on base tables stored in column store format. 
+The benefit of using column store format over row store format is the highest for base tables (typically leaf operators in a query plan).
+As the number of attributes in tables reduce from the leaf levels of the query plans to the root, the advantage of using a column store starts to diminish. 
+
+\paragraph*{\textbf{Hardware Prefetching}}
+Hardware prefetching improves pipelining query performance.
+The effect is more prominent in row store than in column store format. 
+We saw that prefetching improves scan performance in a representative query.
+Prefetching had no effect on probe operations and it affected the performance of build hash operations adversely. 
+
+As L3 cache size increase becomes a less viable option due to power constraints, hardware prefetching techniques are being looked at with greater interest~\cite{DBLP:journals/csur/Mittal16c}. 
+Combined with the software-based prefetching efforts~\cite{DBLP:conf/icde/ChenAGM04, rof}, hardware prefetching could provide greater benefits in the future. 
