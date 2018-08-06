@@ -1,21 +1,25 @@
-\section{Discussion of Dimensions}\label{sec:dimensions}
-In this section we discuss the various dimensions that we use for our analysis.
-Through our study, we would like to understand the impact of these dimensions on the performance of pipelining and non-pipelining strategies in the in-memory setting. 
+\section{Discussion on Dimensions}\label{sec:dimensions}
+The performance of pipelining and non-pipelining strategies depends upon multiple factors associated with query processing.
+We broadly classify these dimensions in three categories: physical organization of data (storage format and block size), execution environment (parallelism and hardware characteristics), and structural aspects of query (pipeline sequence).
+In this section we discuss these dimensions.
 
 \subsection{Storage Format}
-To explore the relationship between pipelining performance and storage formats, we use two storage formats for our evaluation namely row store and column store.
-All the base tables in the TPC-H schema are stored in the same storage format.
-We use row store format for temporary tables irrespective of the storage format of the base tables.
+Data processing time is impacted by the way data are organized.
+We look at two common storage formats: row store and column store.
+In column store format, values of a given column are stored in contiguous memory region.
+Accessing a single column which has a sequential access pattern, results in a good cache behavior.
+In row store format, all columns of a tuple are stored in a contiguous region. 
+Thus accessing a particular column involves bringing unnecessary data (non-referenced columns) in the caches. 
 
 Column stores have shown to have higher performance for analytical workloads~\cite{DBLP:conf/sigmod/AbadiMH08}. 
-The difference between the performance of column store and row store format is most prominent for scan operators.
+The difference between the performance of column store and row store format is prominent for scan operators.
 Typically scans are faster with column store than in row store.
-In column store format, values of a given column are stored in contiguous memory region.
-Thus accessing a single column which has a sequential access pattern, results in a good cache behavior.
 
-In row store format, all columns of a tuple are stored together, thus accessing a particular column involves bringing unnecessary data (non-referenced columns) in the caches. 
+%To explore the relationship between pipelining performance and storage formats, we use two storage formats for our evaluation namely row store and column store.
 Recent studies~\cite{quickstep-system} have shown that the performance gap between column stores and row stores is not as high as shown in the prior work.
-Therefore we experiment with both storage formats for our comparison. 
+Therefore we experiment with both storage formats. 
+For our comparison, all the base tables in the TPC-H schema are stored in the same storage format.
+We use row store format for temporary tables irrespective of the storage format of the base tables.
 
 \subsection{Block Size}
 We start by explaning the concept of block size.
@@ -29,7 +33,7 @@ Therefore, compared to a larger block size, the probe tasks may be scheduled mor
 
 \subsection{Parallelism}
 Intra-operator parallelism is prevalent in many modern database systems~\cite{monetdb, morsel, quickstep-system, vectorwise}.
-Pipelining could be considered as a case of inter-operator parallelism, as in a pipeline multiple operators could be under execution simultaneously. 
+Pipelining encapsulates inter-operator parallelism, as it exemplifies simultaneous execution of producer and consumer operators in a pipeline.
 We would like to study the impact of parallelism on the relative performance of pipelining and non-pipelining.
 
 We define some terminologies that are relevant for our study in the context of concurrency.
@@ -52,37 +56,45 @@ In an ideal environment, adding more threads for an operator execution should of
 The assumption being that each parallel \wo{} operates at the same speed and thus by executing more tasks concurrently, the overall execution time reduces proportionally. 
 
 Linear speedups for operators (or for queries as a whole) are not always possible.
-DeWitt and Gray~\cite{DBLP:journals/cacm/DeWittG92} propose reasons for less than ideal speedup such as startup costs, interference from concurrent execution and skew.
-We can extend some of their ideas to in-memory systems, though their analysis was targeted towards parallel databases. 
-For example in the in-memory settings, interference can come from various sources such as contention due to latches, and shared use of a common bandwidth like memory bandwidth or bandwidth for data movement across NUMA sockets.
+DeWitt and Gray~\cite{DBLP:journals/cacm/DeWittG92} propose reasons for less than ideal speedup for parallel databases such as startup costs, interference from concurrent execution and skew.
+We can extend some of their ideas to in-memory systems.
+For example interference can come from various sources such as contention due to latches, and shared use of a common bandwidth like memory bandwidth or bandwidth for data movement across NUMA sockets.
 
-For an operator that exhibits poor speedup behavior, increasing its DOP beyond a limit degrades its performance.
+For an operator that exhibits poor scalability, increasing its DOP beyond a limit degrades its performance.
 Specifically the execution time for each \wo{} of the operator increases. 
-We observe that poor speedup can potentially have contrasting impact on pipelining (positive) and non-pipelining (negative) strategies.
-The reason for such contrasting behavior is that the DOP of a consumer operator in a pipeline tends to be smaller in case of pipelining strategy; where as it is higher in the non-pipelining strategy.
+We observe that poor speedup can have contrasting impact on pipelining (positive) and non-pipelining (negative) strategies.
+The reason for such contrasting behavior lies in the difference in the DOP values of a consumer operator in query processing with and without pipelining.
+Recall from Figure~\ref{fig:pipelining-schedules} that pipelining yields in a lower DOP for the consumer operator, where as non-pipelining results in a higher DOP for the consumer operator.
 
 \subsection{Hardware Prefetching}
-Hardware prefetching is a technique used by modern hardware to proactively fetch data in caches by speculating its access in the future.
+We start by explaining what hardware prefetching is. 
+It is a technique used by modern hardware to proactively fetch data in caches by speculating its access in the future.
 The prefetcher observes patterns of data accesses from memory to caches and speculates the access of a data element in advance.
-Prefetching reduces the penalty of a cache miss and thus potentially improves performance.
+Prefetching hides the latency due to a cache miss and thus potentially improves performance.
+There are two kinds of prefetching: spatial and temporal, among which we focus on spatial prefetching. 
+
+Now we describe why prefetching is important to our study. 
+Pipelining involves a context switch on the kinds of \wo{}s that get executed (c.f. Figure~\ref{fig:pipelining-schedules}).
+Thus pipelining may affect prefetcher's understanding of data access pattern. 
+Therefore we are specifically interested in the impact of hardware prefetching on pipelined query processing. 
+%Spatial prefetching is relevant when there is a sequential access pattern. 
+%For example, if a data element at position $i$ is accessed at time $t$, it is likely that at time $t + 1$, the data element at position $i + 1$ will be accessed.
+%Thus the data element at position $i + 1$ can be prefetched to improve performance.
+%Temporal prefetching is associated with repeated accesses of the same data element.
 
 In addition to the hardware-based prefetching implementation, there are software-based techniques for prefetching.
-Software-based prefetching techniques have been studied to improve the performance of database operators (\cite{rof,  DBLP:conf/icde/ChenAGM04}).
-However we restrict ourselves to hardware-based prefetching, as we can observe the impact of hardware prefetcher without modifying the implementation of the relational operators in the system.
+There is prior work on using software-based prefetching to improve the performance of database operators~\cite{DBLP:conf/icde/ChenAGM04, rof}.
+We restrict ourselves to hardware-based prefetching, as we can observe the impact of hardware prefetcher without modifying the implementation of the relational operators.
 
-There are two kinds of prefetching: spatial and temporal. 
-Spatial prefetching is relevant when there is a sequential access pattern. 
-For example, if a data element at position $i$ is accessed at time $t$, it is likely that at time $t + 1$, the data element at position $i + 1$ will be accessed.
-Thus the data element at position $i + 1$ can be prefetched to improve performance.
-Temporal prefetching is associated with repeated accesses of the same data element.
-
-For our study, we run the queries using pipelining and non-pipelining strategies in two scenarios: a) hardware prefetching is enabled (default behavior of the hardware) b) hardware prefetching is disabled (by setting bit 0 and 1 in Model-specific Register (MSR) at address 0x1A4) as disclosed by Intel~\cite{intel-prefetching}.
+For our study, we run the queries with pipelining in two scenarios: a) hardware prefetching is enabled (default behavior of the hardware) b) hardware prefetching is disabled (by setting bit 0 and 1 in Model-specific Register (MSR) at address 0x1A4) as disclosed by Intel~\cite{intel-prefetching}.
 
 \subsection{Pipeline Sequences}\label{ssec:pipeline-sequencing-algo}
 A query plan is composed of several pipelines that are connected to each other. 
-To execute a query, there are many possible permutations of such pipelines. 
-In order to compare query performance with and without pipelining, we need to make sure that both strategies use the same sequence.
-We present an algorithm that given a query plan, sequences them to generate a pipelining sequence that maximizes the opportunity for pipelining. 
+To execute a query, there are many possible permutations of such pipelines each with potentially different performance characteristic. 
+
+To compare query performance with and without pipelining, we should ensure that both strategies use the same sequence.
+Therefore to come up with a sequence given a query plan, we present an algorithm.
+This algorithm generates a pipelining sequence that maximizes the opportunity for pipelining. 
 We call this algorithm MPS (Maximal Pipeline Sequence) Algorithm.
 %We now describe our algorithm for sequencing pipelines in a query plan. 
 
@@ -92,8 +104,7 @@ Simultaneous execution of multiple pipelines could pollute the cache, thus makin
 We assume a hash-based implementation of join algorithms.
 A logical join operation has corresponding two physical operators: a build operator that builds the hash table and a probe operator that lets the input probe the hash table.
 The probe operator does not begin its execution until the build operator's execution is over.
-Each pipeline has a unique ID. 
-Unless specified, we assume that there is enough memory available to execute a query. 
+We assume no disk spilling during a query execution. 
 
 %If (node.name() == SELECT) {
 %		Return node.id();
@@ -115,10 +126,10 @@ Unless specified, we assume that there is enough memory available to execute a q
 		\State \Return op.ID();
 		\EndIf
 		\If {op.name() == {\tt build}}
-		\State \Return  GetSequence(op.inputOp()) + op.ID();
+		\State \Return  GetSequence(op.child()) + op.ID();
 		\EndIf	
 		\If {op.name() == {\tt probe}}
-		\State \Return  GetSequence(op.buildOp)) + GetSequence(op.inputOp()) + op.ID();
+		\State \Return  GetSequence(op.buildOp)) + GetSequence(op.child()) + op.ID();
 		\EndIf	
 		\EndFunction		
 			
@@ -126,7 +137,7 @@ Unless specified, we assume that there is enough memory available to execute a q
 	\label{alg:pipeline-sequence}
 \end{algorithm}
 
-Algorithm~\ref{alg:pipeline-sequence} describes the MPS algorithm and it is a variation of depth first traversal. 
+Algorithm~\ref{alg:pipeline-sequence} describes the MPS algorithm which is a variation of depth first traversal of the query plan DAG. 
 The key heuristics behind the algorithm is to construct the hash tables for the join early and facilitate the pipelining for the probing, by delaying the execution of the probe operator.
 There are two kinds of inputs for a probe operator - the probe relation and the hash table.
 By nature, the accesses within the hash table are random, where as the access pattern for the probe relation is sequential. 

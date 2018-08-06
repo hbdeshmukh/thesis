@@ -4,9 +4,7 @@ Our model is primarily meant for in-memory environments, but it can be easily ex
 We use two key ideas in formulating our model, which we describe below.
 
 First idea is to focus on the difference between the two strategies while ignoring the similarities between them.
-The cost of executing an operator is composed of costs from basic operations such as reading data, processing data and writing data. 
-Between the two scheduling options for an operator -- pipelining and non-pipelining -- the overall cost of certain parameters can be similar, and they can differ in the total costs of some basic operations/parameters. 
-As an example, all processing eventually happens after data is moved to L1 cache -- so the total cost of reading from L1 cache is the same irrespective of the schedule, assuming no work is done twice. 
+Many operations are common to query processing with and without pipelining: e.g. the total cost of reading from L1 cache is the same irrespective of the schedule.
 As we are interested in a relative comparison of the two strategies, it is safe to ignore the costs of operations which are common to both strategies and focus on the additional work for each strategy that is not present in the other strategy. 
 
 Our second idea is that when dealing with multi-megabyte blocks in a sequential access pattern, the cost of L3 cache misses of reading the block is less than missing the entire block.
@@ -19,7 +17,7 @@ Pipelines of higher lengths and/or different operators can be dealt with similar
 Table~\ref{table:analytical-model-notation} contains various parameters that we use to determine the costs for different scheduling strategies.
 
 \begin{table}
-	\begin{tabular}{|l|p{14cm}|}
+	\begin{tabular}{|p{1.35cm}|p{6.2cm}|}
 		\hline
 		\textbf{Notation} & \textbf{Description} \\
 		\hline
@@ -84,14 +82,14 @@ This ratio can be simplified to
 \end{equation*}
 
 We consider few representative cases below to estimate the difference between the two strategies.
-For high block sizes, $p_2$ is close to 1. 
+For high block sizes (size $> \frac{|L_3|}{2 * T}$), $p_2$ is close to 1. 
 For such large blocks, the amortized cost of sequentially reading a block to L3 ($AR_{L3}$) is similar to reading a block on its own from memory ($R_{mem}$), as prefetching is not going to provide much help. 
 Thus we expect for larger block sizes, the difference between two strategies to be negligible. 
 
 We acknolwedge that our model does not adequately capture the behavior for smaller block sizes.
 Smaller block sizes result in a large number of blocks, which incurs a large overhead in storage management.
 Some examples for such overhead include creation cost of several blocks, maintaining references for blocks present in-memory, synchronization costs in the data structures for storage management etc.
-Moreover linux hugepages encourages using pages with large sizes (such as 2 MB), so that the TLB misses are reduced.
+Moreover linux hugepages facilitate using pages with large sizes (such as 2 MB), so that the TLB misses are reduced.
 A detailed analysis of overheads for small block sizes is beyond the scope of our study.
 %For smaller block sizes, $p_2$ is smaller.
 %Consider an L3 of size 24 MB, with block size as 128KB, and using 10 threads. 
@@ -99,23 +97,20 @@ A detailed analysis of overheads for small block sizes is beyond the scope of ou
 %Even if we assume $AR_{L3} = R_{mem}$ and $W_{mem} = R_{mem}$, we end up with $1.9 * N^{out}_{select} * R_{mem}$.
 %Plugging in representative values for selectivity as 50\% and for DDR4, we get the difference to be $1.9 * (8 \text{GB} * 0.5 / 128 \text{KB}) * (14 \text{ns} * 128 \text{KB} / 8 \text{bytes}) = 7.2$ seconds.
 
-\subsection{Applying the model to disk setting}\label{ssec:model-disk}
+\subsection{Applying the Model to Disk Setting}\label{ssec:model-disk}
 Our model can be easily applied to the disk setting. 
-For the term $M_h$, which is the cost of data miss from memory hierarchy $h$, we use the cost of disk access. 
-The terms $r$, $r_b$ and $w$ are replaced by disk's read and write latencies respectively. 
+We change the parameters from Table~\ref{table:analytical-model-notation} appropriately to fit the disk setting.
 The terms $p_1$ and $p_2$ can be nearly 0, assuming that the hash table is always kept in the buffer pool. 
-
 Thus, we can see that the additional work done in the non-pipelining setting is 
 \begin{equation*}
 R_{disk} * N^{in}_{probe} +  w_{disk} * N^{out}_{select}
 \end{equation*}
 which could be in the order of seconds for thousands of blocks. 
-
-The additional work done in the pipelining setting is 
+The additional work done in the pipelining setting:
 \begin{equation*}
 N^{out}_{select} * IC + N^{in}_{probe} * IC
 \end{equation*}
-which is substantially less (order of nanoseconds or microseconds for thousands of blocks) than that in the non-pipelining case.
+is substantially less (order of nanoseconds or microseconds for thousands of blocks) than that in the non-pipelining case.
 Thus the analytical model is consistent with the expected behavior for disk-based systems. 
 
 \subsection{Micro-benchmarking}

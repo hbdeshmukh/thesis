@@ -7,9 +7,9 @@ Our high level conclusion is that in the in-memory setting, for systems using bl
 We now discuss the impact of individual dimensions.
 
 \paragraph*{\textbf{Block size}}
-We find that a higher block size bridgest the gap between pipelining and non-pipelining. 
+We find that a higher block size bridges the gap between pipelining and non-pipelining. 
 A larger block size results in a lower degree of parallelism for operators in a pipeline and thus also aides those operators that suffer from poor scalability. 
-A too large block size however can cause memory fragmentation.
+A very large block size however can cause memory fragmentation.
 It may also result in a very low DOP such that CPU cores are left underutilized. 
 
 \paragraph*{\textbf{Parallelism}}

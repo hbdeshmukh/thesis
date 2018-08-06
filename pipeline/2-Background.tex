@@ -10,12 +10,12 @@ Deeper pipelines may consist more than two operators, such that any two adjacent
 Data from the original producer operator can be passed all the way to the last operator in the pipeline. 
 An example of such deep pipeline could be a left-deep plan for a multi-way join query.
 
-A query plan can be viewed as set of connected pipelines. 
-Certain operators are pipeline-breakers which means data cannot be streamed beyond the pipeline breaking operator. 
-
+%A query plan can be viewed as set of connected pipelines. 
+%Certain operators are pipeline-breakers which means data cannot be streamed beyond the pipeline breaking operator. 
+%
 There are two aspects about pipelining: \textit{Materialization} (or the lack of) and \textit{eager} execution of consumer operator on the output of the producer operator. 
 Note that various systems may have different representations for the temporary data, which is the output of a producer operator. 
-Systems such as MonetDB~\cite{monetdb} and \sys{} that operate with the block-style processing model fully materialize the output. 
+Systems such as MonetDB~\cite{monetdb} and \sys{}~\cite{quickstep-system} that operate with the block-style processing model fully materialize the output. 
 Vectorwise~\cite{vectorwise} has a compact representation of the intermediate output and does not fully materialize the ouptut.
 Systems such as Hyper~\cite{hyper}, LegoBase~\cite{legobase} generate compiled code for the full pipeline, therefore they do not need to have a representation for the temporary data.
 
@@ -47,13 +47,13 @@ Work sharing across queries has been studied extensively. ~\cite{DBLP:conf/sigmo
 Scan sharing has shown to have significant improvements in query performance, especially in the disk-setting.
 Such sharing typically happens for the selection operation on large tables (e.g. lineitem in TPC-H schema), which in many query plans is the starting point of a pipeline. 
 
-Given the wide variety of the related work in this domain, we now concretely describe the scope of our work.
-In the in-memory single node setting on systems that use the block-based query processing, we examine the gap between pipelining and non-pipelining execution strategies. 
-The two strategies behave similarly w.r.t how they materialize the intermediate output.
-They differ based on how eagerly the intermediate data is consumed by the producer operator. 
-In the pipelining strategy, the intermediate data is consumed \textit{eagerly}, i.e. as soon as it is produced.
-In the non-pipelining strategy, the intermediate data is consumed \textit{lazily}, i.e. after all the tasks of the producer are complete.
-
+%Given the wide variety of the related work in this domain, we now concretely describe the scope of our work.
+%In the in-memory single node setting on systems that use the block-based query processing, we examine the gap between pipelining and non-pipelining execution strategies. 
+%The two strategies behave similarly w.r.t how they materialize the intermediate output.
+%They differ based on how eagerly the intermediate data is consumed by the producer operator. 
+%In the pipelining strategy, the intermediate data is consumed \textit{eagerly}, i.e. as soon as it is produced.
+%In the non-pipelining strategy, the intermediate data is consumed \textit{lazily}, i.e. after all the tasks of the producer are complete.
+%
 %We focus on two aspects: First, whether the input to an operator is hot and second, prefetching. 
 %Next, we discuss the hotness of input factor.
 %
