@@ -13,7 +13,7 @@ designed to efficiently leverage contemporary hardware aspects such as large mai
 The control flow associated with query execution in \sys{} involves first parsing the query, and then optimizing the query using a cost-based query optimizer.
 The optimized query plan is represented as a Directed Acyclic Graph (DAG) of relational operator primitives. 
 %Currently, the system employs hash-based implementation for join and aggregate operators. 
-The query plan DAG is then sent to a \textit{scheduler}, which is the focus of this paper. 
+The query plan DAG is then sent to a \textit{scheduler}, which is the focus of this chapter. 
 The scheduler runs as a separate thread and coordinates the execution of all queries. 
 Apart from the scheduler, \sys{} has a pool of worker threads that carry out computations on the data. 
 

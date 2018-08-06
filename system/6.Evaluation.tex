@@ -245,9 +245,8 @@ However query plans are often complex with several different types of operators.
 Thus while considering overall query execution time, selection forms one fraction of the overall time distribution. 
 
 We have also experimented with compressed column-stores in this same setting, and find that they are slower than non-compressed column stores. Compressed column stores are still faster than row store by about 50\% overall. But compression adds run-time CPU overhead which reduces is overall performance compared to regular column stores. 
-(In the interest of space we do not present the detailed results.)
-
-The results for TPC-H are similar, and omitted in the interest of space.
+The results for TPC-H are similar. 
+We present the TPC-H results in Chapter~\ref{chap:pipeline}, where we also discuss the impact of various dimensions like storage format, parallelism and block size on the performance of pipelined query processing.
 
 %We note that the end-to-end impact of a Column Store for entire queries is in some cases quite small. Within \Quickstep\ pipelines, the impact of columnstores is quite small. That is, operations like HashJoin or Sort are not effected as severely by the choice of block type as are simple scans. Thus in queries where simple scans are essentially the only operator, we see huge performance improvements from using columnstores. This is case in the first three queries of SSB where either there are no joins, or the join is eliminated by an optimization. Here columnstores perform nearly three times better than rowstores.
 
@@ -256,14 +255,29 @@ The results for TPC-H are similar, and omitted in the interest of space.
 %\label{sec:quickstep-impact}
 %In the next set of experiments, we aim to examine the impact of selected individual techniques in \Quickstep\ to determine their individual contribution. With these set of experiments, we leverage the fact that there are multiple implementations in Quickstep and we can use that to carry out a comparison of popular techniques and compare that on contemporary settings. For all the experiments presented in this section, we use SSB SF 100 and the 160 GB server machine that is described in Section~\ref{sec:ssb100}.
 
-\twoabfigures
-{system/figures/lip-ef-impact-total}
-{system/figures/lip-ef-impact}
-{\textbf{Impact of Exact Filter and LIP using SSB at scale factor 100.}}
-{fig-lip-ef-impact}
-{Overall speedup}
-{Breakdown of speedup due to techniques}
-{bht}
+\begin{figure}[bht]
+	\centering 
+	\begin{subfigure}[ht]{0.2\textwidth}
+		\includegraphics[width=\textwidth]{system/figures/lip-ef-impact-total}
+		\caption{Overall}
+	\end{subfigure}
+	~
+	\begin{subfigure}[ht]{0.7\textwidth}
+		\includegraphics[width=\textwidth]{system/figures/lip-ef-impact}
+		\caption{Breakdown of speedup due to techniques}
+	\end{subfigure}
+	\caption{\textbf{Impact of Exact Filter and LIP using SSB at scale factor 100.}}
+	\label{fig-lip-ef-impact}
+\end{figure}
+
+%\twoabfigures
+%{system/figures/lip-ef-impact-total}
+%{system/figures/lip-ef-impact}
+%{\textbf{Impact of Exact Filter and LIP using SSB at scale factor 100.}}
+%{fig-lip-ef-impact}
+%{Overall speedup}
+%{Breakdown of speedup due to techniques}
+%{bht}
 
 \begin{figure*}[htb]
    \vspace*{3em}

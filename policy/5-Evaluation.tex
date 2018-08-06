@@ -89,6 +89,23 @@ As we can see, the CPU utilization of all the queries remains nearly equal to ea
 
 Notice that the available CPU resources also get automatically distributed elastically among the active queries (e.g. at the 10 and 18 seconds marks) when a query finishes its execution. 
 This elasticity behavior allows \sys{} to fully utilize the CPU resources at \textit{all} times.
+
+In order to quantify the fairness metric, we compute the standard deviation of the relative CPU utilizations of queries.
+At a given instant, we only consider the active queries and compute the standard deviation of their relative CPU utilizations. 
+
+The result for this experiment can be found in Figure~\ref{fig:stddev-active-queries-fair}.
+Notice that for the first 7 seconds when all 13 SSB queries are under execution, the standard deviation of CPU utilizations is nearly zero, which means the fair policy gives all queries nearly equal share of CPU. 
+As more queries finish their execution, there is a transient phase (notice the peaks) after which the standard deviation drops to low levels. 
+This experiment also reinforces the previous results quantitatively, and shows that the implementation is able to meet the policy specifications.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\columnwidth]{policy/figures/fair-stddev}
+	\caption{Standard deviation of CPU utilization of active queries for fair policy}
+	\label{fig:stddev-active-queries-fair}
+\end{figure}
+
+Figure 
 \subsubsection{HPF}
 Now we validate if the implementation matches the 
 specification of the HPF (cf. Table~\ref{table:policy-interpreatations}) policy.

@@ -1,3 +1,4 @@
+\chapter{Revisiting Pipelining for In-memory Database Systems}\label{chap:pipeline}
 \section{Introduction}
 
 Pipelined execution of operators in a query plan is ubiquitous in database management systems~\cite{quickstep-system, monetdb, hyper, vectorwise, elastic-pipelining}. 
@@ -125,10 +126,10 @@ We summarize our contributions as follows:
 	\item As block sizes increase, pipelining and non-pipelining strategies start to behave similarly. This is a surprising result given the amount of attention pipelined query processing has received in the past. 
 	\item We propose an anlytical model to compare the differences between pipelining and non-pipelining strategies.
 \end{itemize}
-Our paper is organized as follows: In Section~\ref{sec:pipe-background} we provide a background about pipelining in database systems and also discuss related work.
+This chapter is organized as follows: In Section~\ref{sec:pipe-background} we provide a background about pipelining in database systems and also discuss related work.
 We give a brief overview of \sys{} in Section~\ref{sec:sys-background}.
 We discuss the dimensions associated with this study in Section~\ref{sec:dimensions}.
 We present an analytical model to understand the behavior of pipelining and non-pipelining strategies along with micro-benchmarking results in Section~\ref{sec:model}.
 In Section~\ref{sec:experiments}, we present the experimental evaluations.
 Section~\ref{sec:experiment-summary} summarizes our experimental findings.
-Finally, we discuss the future work and conclude in Section~\ref{sec:conclusions}.
+%Finally, we discuss the future work and conclude in Section~\ref{sec:conclusions}.
