@@ -28,6 +28,32 @@ A new query processing approach that we introduce (which, to the best of our kno
 
 To illustrate this technique, consider the SSB~\cite{ssb} query Q4.1 (see Figure~\ref{fig-q41-original}). Notice that in this query the \texttt{part} table does not contribute any attributes to the join result with \texttt{lineorder}, and the primary key constraint guarantees that the \texttt{part} table does not contain duplicates of the join key. Thus, we can transform the \texttt{lineorder} -- \texttt{part} join into a semi-join, as shown in Figure~\ref{fig-q41-semijoin}. During query execution, after the selection predicate is applied on the \texttt{part} table, we insert each resulting value in the join key (\texttt{p\_partkey}) into an \textit{exact filter}. This filter is implemented as a bitvector, with one bit for each potential \texttt{p\_partkey} in the  \texttt{part} table. The size of this bitvector is known during query compilation based on the min-max statistics present in the catalog. (These statistics in the catalog are  kept updated for permanent tables even if the data is modified.) The EF is then probed using the \texttt{lineorder} table. The \texttt{lineorder} -- \texttt{supplier} join also benefits from this optimization.
 
+\begin{figure*}[t]
+	\centering
+	\begin{subfigure}[bt]{0.3\textwidth}
+		\centering
+		\includegraphics[width=1.0\textwidth,
+		height=0.75\textwidth]{system/figures/Q41-original.pdf}
+		\caption{Original query plan}
+		\label{fig-q41-original}
+	\end{subfigure} %
+	\begin{subfigure}[bt]{0.3\textwidth}
+		\centering
+		\includegraphics[width=1.0\textwidth,
+		height=0.75\textwidth]{system/figures/Q41-semijoin.pdf}
+		\caption{Plan using join to semi-join transformation}
+		\label{fig-q41-semijoin}
+	\end{subfigure} %
+	\begin{subfigure}[bt]{0.3\textwidth}
+		\centering
+		\includegraphics[width=1.0\textwidth,
+		height=0.75\textwidth]{system/figures/Q41-LIP.pdf}
+		\caption{Query plan using LIP (only)}
+		\label{fig-q41-lip}
+	\end{subfigure} %
+	\caption{\textbf{Query plan variations for SSB Query 4.1}}
+\end{figure*}
+
 The implementation of semi-join operation using EF rather than hash tables improves performance for many reasons. First, by turning insertions and probes into fast bit operations, it eliminates the costs of hashing keys and chasing collision chains in a hash table. Second, since the filter is far more succinct than a hash table, it improves the cache hit ratio. Finally, the predictable size of the filter eliminates costly hash table resize operations that occur when selectivity estimates are poor.
 
 The same optimization rule also transforms anti-joins into semi-anti-joins, which are implemented similarly using EFs.

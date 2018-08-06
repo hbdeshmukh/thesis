@@ -161,30 +161,4 @@ The calculation of the probability values for different policies implemented in 
 To prevent the system from thrashing (e.g. out of memory), a load controller is in-built into the scheduler.
 During concurrent execution of the queries, the load controller can control the admission of queries into the system and it may suspend resource intensive queries, to ensure resource availability.
 
-\begin{figure*}[t]
-\centering
-\begin{subfigure}[bt]{0.3\textwidth}
-  \centering
-   \includegraphics[width=1.0\textwidth,
-                    height=0.75\textwidth]{system/figures/Q41-original.pdf}
-   \caption{Original query plan}
-   \label{fig-q41-original}
-\end{subfigure} %
-\begin{subfigure}[bt]{0.3\textwidth}
-  \centering
-   \includegraphics[width=1.0\textwidth,
-                    height=0.75\textwidth]{system/figures/Q41-semijoin.pdf}
-   \caption{Plan using join to semi-join transformation}
-   \label{fig-q41-semijoin}
-\end{subfigure} %
-\begin{subfigure}[bt]{0.3\textwidth}
-  \centering
-   \includegraphics[width=1.0\textwidth,
-                    height=0.75\textwidth]{system/figures/Q41-LIP.pdf}
-   \caption{Query plan using LIP (only)}
-   \label{fig-q41-lip}
-\end{subfigure} %
-\caption{\textbf{Query plan variations for SSB Query 4.1}}
-\end{figure*}
-
 Finally, we note that by simply tracking the work orders that are completed, Quickstep can provide a built-in generic query progress monitor (shown in Section~\ref{sec:progress-monitoring}).
