@@ -18,14 +18,14 @@ Our vectorized execution on blocks has similarity to the work on columnar execut
 The design of \Quickstep's storage blocks has similarities to the tablets in Google's BigTable~\cite{DBLP:conf/osdi/ChangDGHWBCFG06}.
 However, tablets' primary purpose is to serve sorted key-value store applications whereas  \Quickstep's storage blocks adhere to a  relational data model allowing for optimization such as efficient expression evaluation (cf. Section~\ref{vectorization}).
 
-Our use of a block-based storage design naturally leads to a block-based scheduling method for query processing, and this connection has been made by Chasseur et al.~\cite{ChasseurP13} and Leis et al.~\cite{LeisBK014}.
+Our use of a block-based storage design naturally leads to a block-based scheduling method for query processing, and this connection has been made by Chasseur et al.~\cite{quickstep-storage} and Leis et al.~\cite{LeisBK014}.
 In this work, we build on these ideas. 
 We also leverage these ideas to allow for desirable properties, such as dynamic elastic behavior (cf. Section~\ref{sec:expt:elasticity}).
 
 Philosophically, the block-based scheduling that we use is similar to the MapReduce style query execution~\cite{mapreduce}. 
 A key difference between the two approaches is that there is no notion of pipelining in the original MapReduce framework, however \Quickstep\ allows for pipelined parallelism.  Further, in Quickstep common data structures (e.g. an aggregate hash table) can be shared across different tasks that belong to the same operator.
 
-The exact filters build on the rich history of semi-join optimization dating back at least to Bernstein and Chiu~\cite{Bernstein1981SemiJoin}. The LIP technique presented in Section~\ref{sec:lip} also draws on similar ideas, and is described in greater detail in~\cite{zhu2017looking}. 
+The exact filters build on the rich history of semi-join optimization dating back at least to Bernstein and Chiu~\cite{Bernstein1981SemiJoin}. The LIP technique presented in Section~\ref{sec:lip} also draws on similar ideas, and is described in greater detail in~\cite{DBLP:journals/pvldb/ZhuPSP17}. 
 
 Achieving \textit{robustness} in query processing is a goal for many database systems~\cite{graefe_et_al:DSP:2011:2984}.
 \Quickstep\ uses the LIP technique to achieve robust performance for star-schema  queries. 

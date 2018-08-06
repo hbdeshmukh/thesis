@@ -2,11 +2,8 @@
 
 \section{Storage Manager} \label{storage-manager}
 
-The \Quickstep\ storage manager~\cite{ChasseurP13} is based on a  block-based architecture, which we describe next. The storage manager allows a variety of physical data organizations to coexist within the same database, and even within the same table. We briefly outline the block-based storage next.
+The \Quickstep\ storage manager~\cite{quickstep-storage} is based on a  block-based architecture, which we describe next. The storage manager allows a variety of physical data organizations to coexist within the same database, and even within the same table. We briefly outline the block-based storage next.
 
-%(See~\cite{ChasseurP13} for a more detailed description.) %We have chosen this highly-flexible and extensible design for physical storage based on empirical experiments that show that the performance of core data-intensive relational operations like selection and projection can be very sensitive to the layout of data in memory, and
-%This design leverages the insight that there is no single ``one size fits all'' storage organization %that achieves good performance
-%for all workloads~\cite{ChasseurP13}.
 \subsection{Block-Structured Storage} \label{block-structure}
 Storage for a particular table in \Quickstep\ is divided into many blocks with possibly different layouts, with individual tuples wholly contained in a single block. Blocks of different sizes are supported, and the default block size is 2 megabytes. On systems that support large virtual-memory pages, \Quickstep\ constrains block sizes to be an exact multiple of the hardware large-page size (e.g. 2 megabytes on x86-64) so that it can allocate buffer pool memory using large pages and make more efficient use of processor TLB entries.
 

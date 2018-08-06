@@ -9,7 +9,7 @@ There are several challenges associated with scheduling  concurrent execution of
 The first challenge is related to exploiting the large amount of hardware parallelism that is available inside modern servers, as it requires dealing with two key types of parallelism.
 %efficiently utilizing the .  % considering the availability of large number of CPU cores. 
 The first type is \textit{intra-query parallelism}. 
-Modern database systems often use query execution methods that have a high intra-query parallelism~\cite{qsstorage,morsel,wang2016elastic}.
+Modern database systems often use query execution methods that have a high intra-query parallelism~\cite{quickstep-storage,morsel,wang2016elastic}.
 Concurrent query execution adds another layer of parallelism, i.e. \textit{inter-query parallelism}. 
 %Modern servers offer lot of parallelism in terms of CPU cores. 
 %Allocation of CPU resources to various tasks is a big challenge in this context. 

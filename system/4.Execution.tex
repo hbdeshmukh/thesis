@@ -156,7 +156,7 @@ The Policy Enforcer is aware of the current resource allocation to different que
 The predictions about execution time of future work orders of a query are provided by a component called the \textit{Learning Agent}.
 It uses a prediction model that takes execution statistics of the past work orders of a query as input and estimates the execution time for the future work orders for the query.
 
-The calculation of the probability values for different policies implemented in \Quickstep\, and their relation with the estimated work order execution time is presented in~\cite{scheduler}.
+The calculation of the probability values for different policies implemented in \Quickstep\, and their relation with the estimated work order execution time is presented in~\cite{DBLP:conf/bigdata/DeshmukhMP17}.
 
 To prevent the system from thrashing (e.g. out of memory), a load controller is in-built into the scheduler.
 During concurrent execution of the queries, the load controller can control the admission of queries into the system and it may suspend resource intensive queries, to ensure resource availability.

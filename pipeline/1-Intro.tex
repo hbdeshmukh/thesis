@@ -1,7 +1,7 @@
 \chapter{Revisiting Pipelining for In-memory Database Systems}\label{chap:pipeline}
 \section{Introduction}
 
-Pipelined execution of operators in a query plan is ubiquitous in database management systems~\cite{quickstep-system, monetdb, hyper, vectorwise, elastic-pipelining}. 
+Pipelined execution of operators in a query plan is ubiquitous in database management systems~\cite{quickstep-system, monetdb, hyper, vectorwise, wang2016elastic}. 
 A key aspect of pipelining that is exploited by many systems is the prevention of materialization of intermediate results of an operator.  
 In a disk-based system, read and write operations involving disk are expensive.
 Thus pipelining significantly improves query performance in disk-based systems. 

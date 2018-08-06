@@ -1,7 +1,7 @@
 % !TEX root = scheduler.tex
 \section{Background}\label{sec:background}
 In this section we establish some prerequisites for the proposed Quickstep scheduler framework.
-\sys{}~\cite{quickstep-vldb} is an open-source relational database engine 
+\sys{}~\cite{quickstep-system} is an open-source relational database engine 
 % and SQL as its query language.  \sys{} 
 designed to efficiently leverage contemporary hardware aspects such as large main memory, multi-core, and multi-socket server settings. 
 %The system aims to deliver high performance in read-mostly data warehousing 
@@ -17,8 +17,8 @@ The query plan DAG is then sent to a \textit{scheduler}, which is the focus of t
 The scheduler runs as a separate thread and coordinates the execution of all queries. 
 Apart from the scheduler, \sys{} has a pool of worker threads that carry out computations on the data. 
 
-\sys{} uses a query execution paradigm (built using previously proposed approaches~\cite{qsstorage,morsel}), in which a query is executed as a sequence of \textit{work orders}. 
-A work order operates on a data block, which is treated as a self-contained mini-database~\cite{qsstorage}.  (c.f. Section~\ref{sec:workorders} for examples of work orders)
+\sys{} uses a query execution paradigm (built using previously proposed approaches~\cite{quickstep-storage,morsel}), in which a query is executed as a sequence of \textit{work orders}. 
+A work order operates on a data block, which is treated as a self-contained mini-database~\cite{quickstep-storage}.  (c.f. Section~\ref{sec:workorders} for examples of work orders)
 The computation that is required for each operator in a query plan is decomposed into a sequence of work orders. 
 For example, a select operator produces as many work orders as there are blocks in the input table. 
 We first describe the storage management in \sys{} in Section~\ref{sec:storage-manager}.
@@ -26,7 +26,7 @@ We first describe the storage management in \sys{} in Section~\ref{sec:storage-m
 
 \section{Storage Management in \sys{}}\label{sec:storage-manager}
 Data organization in the \sys{} storage manager holds the key to intra-query 
-parallelism~\cite{qsstorage}. 
+parallelism~\cite{quickstep-storage}. 
 Data in a relation are organized in the form of blocks. 
 Each block holds a collection of tuples from a single table. 
 A unique aspect of the storage organization in \sys{} is that blocks are considered to 
@@ -46,7 +46,7 @@ be in a column store format.
 %The block size is configurable %(in fact blocks in the same table can be of 
 %%different sizes), %and the recommended block size is 4 MB.
 
-This storage block design, as articulated earlier in~\cite{qsstorage} enables the query execution to be broken down into a set of independent tasks on each block. 
+This storage block design, as articulated earlier in~\cite{quickstep-storage} enables the query execution to be broken down into a set of independent tasks on each block. 
 This is a crucial aspect that we leverage in the design of our scheduler. 
 
 The storage manager also contains a \textit{buffer pool manager}. 

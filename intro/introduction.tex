@@ -10,7 +10,7 @@ As an example, an operating system uses resources such as memory, CPUs, and disk
 It allows multiple processes to use these resources at the same time through sophisticated scheduling techniques. 
 
 %\paragraph{Scheduling's history}
-Scheduling has been studied extensively in many communities including computer science theory, computer systems, and industrial engineering. 
+Scheduling has been studied extensively in many communities including computer science theory, computer systems, and industrial engineering~\cite{Bouganim:1998:MSL:288627.288646, dist-based-scheduling,iCBS-SLA,  DBLP:conf/rtss/HaritsaLC91, DBLP:journals/csur/KwokA99, linn1999hybrid, pinedo2016scheduling, ULLMAN1975384, lottery-scheduling}. 
 Typically a scheduling problems involves finding a schedule with a certain objective.
 The desired solution is the one that either meets the objective or gets close to it.
 Many scheduling problems are difficult in nature.
@@ -82,7 +82,7 @@ Hence the scheduler should have built in resource allocation flexibility, helpin
 Next we take a deeper look into the scheduling problem in database systems.
 The scope of our work is relational analytics (warehouse settings) where data primarily resides in memory. 
 In relational analytics, questions on data are posed via \textit{queries}, that are made up of relational operators. 
-To get an idea of the problem of scheduling in database systems, we compare traditional database systems with MapReduce~\cite{mapreduce} based systems such as Hive~\cite{thusoo2010hive}\footnote{We acknowledge that Hive now supports Tez and Spark run time environments in addition to MapReduce.} in the next section.
+To get an idea of the problem of scheduling in database systems, we compare traditional database systems with MapReduce~\cite{mapreduce} based systems such as Hive\footnote{We acknowledge that Hive now supports Tez and Spark run time environments in addition to MapReduce.}~\cite{thusoo2010hive} in the next section.
 
 \section{Scheduling: Databases and MapReduce}
 We focus on two aspects of scheduling to compare databases and MapReduce frameworks: a) an abstraction for tasks b) connecting resource management with relational operators' semantics.
@@ -112,7 +112,7 @@ We want scheduler as a first class primitive in the database architecture and th
 We now present the contributions of this dissertation. 
 
 \paragraph{Design and Implementation of the Quickstep Database System:}
-The work in this thesis is carried out in the Quickstep Database System~\cite{quickstep-vldb, patel1quickstep, Quickstep-website}.
+The work in this thesis is carried out in the Quickstep Database System~\cite{Quickstep-website, patel1quickstep, quickstep-system}.
 We begin by presenting the design and implementation of Quickstep.
 
 Quickstep targets high performance for in-memory relational analytics. 
@@ -143,6 +143,6 @@ We come up with a surprising conclusion that pipelining does not really help que
 We show the reasons for why these two strategies result in a similar performance through an analytical model and through extensive empirical evaluation on Quickstep.   
 %We propose an algorithm that given a query plan and the resource availability, produces a sequence of pipelines that can provide good query performance.
 
-Readers are advised that the content in this dissertation is based on previously published papers~\cite{quickstep-vldb, original, supplement} and another manuscript under submission.
+Readers are advised that the content in this dissertation is based on previously published papers~\cite{DBLP:conf/bigdata/DeshmukhMP17, supplement, quickstep-system} and another manuscript under submission.
 Large sections of this dissertation are taken directly from these papers. 
 Quickstep is an open source project with its source code available at \url{https://github.com/apache/incubator-quickstep}.

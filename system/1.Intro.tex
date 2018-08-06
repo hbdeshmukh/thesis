@@ -11,11 +11,12 @@ We describe the initial version of Quickstep that targets single-node in-memory 
 Quickstep uses mechanisms that allow for \textit{high intra-operator parallelism}. 
 Such mechanisms are critical to exploit the full potential of the high level of hardware compute parallelism that is present in modern servers (the dotted orange line in Figure~\ref{fig-deficit}).
 
-Unlike most research database management systems (DBMSs), \Quickstep\ has a storage manager with a block layout, where each block behaves like a mini self-contained database~\cite{ChasseurP13}.
+Unlike most research database management systems (DBMSs), \Quickstep\ has a storage manager with a block layout, where each block behaves like a mini self-contained database~\cite{quickstep-storage}.
 This ``independent'' block-based storage design is leveraged by a highly parallelizable query execution paradigm in which independent \textit{work orders} are generated at the block level. Query execution then amounts to creating and scheduling work orders, which can be done in a generic way. Thus, the scheduler is a crucial system component, and the Quickstep scheduler cleanly separates scheduling policies from the underlying scheduling mechanisms. This separation allows the system to elastically scale the resources that are allocated to queries, and to adjust the resource allocations dynamically to meet various policy-related goals.
 
 Recognizing that random memory access patterns and materialization costs often dominate the execution time in main-memory DBMSs, Quickstep uses a number of query processing techniques that take the ``drop early, drop fast'' approach: eliminating redundant rows as early as possible, as fast as possible. For instance, Quickstep aggressively pushes down complex disjunctive predicates involving multiple tables using a %novel
 predicate over-approximation scheme. Quickstep also uses cache-efficient filter data structures to pass information across primary key-foreign key equijoins,  eliminating semi-joins entirely in some cases. 
+Overall, the key contributions of our work are as follows:
 
 \begin{figure}
 	\centering
@@ -24,7 +25,6 @@ predicate over-approximation scheme. Quickstep also uses cache-efficient filter 
 	\label{fig:tpch-q10-waterfall}
 \end{figure}
 
-Overall, the key contributions of our work are as follows:\\
 
 \textbf{Cohesive collection of techniques:} We present the first end-to-end design for Quickstep. This system brings together in a single artifact a number of mechanisms for in-memory query processing such as support for multiple storage formats, a template metaprogramming approach to both manage the software complexity associated with supporting multiple storage formats and to evaluate expressions on data in each storage format efficiently, and novel query optimization techniques.
 The impact of each mechanism depends on the workload, and our system brings these mechanisms together as a whole.
