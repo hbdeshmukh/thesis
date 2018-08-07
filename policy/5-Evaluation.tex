@@ -3,11 +3,9 @@
 In this section, we present an evaluation of our scheduler. 
 The goals of the experimental evaluation are as follows:
 \begin{enumerate}
-%\itemsep -0.1em
 \item To check if the policy enforcement meets the expected criterion defined in 
 the policy behavior. 
 \item To illustrate the role of the learning component, we compare it against a policy implementation that doesn't use the learning-based feedback loop. 
-%In this implementation, each query's probability is \textit{fixed} and \textit{statically determined}.
 \item Examine the behavior of the learning-based scheduler in the presence of 
 execution skew. 
 \item To observe the behavior of the load controller component of the scheduler in extreme/overloaded scenarios.
@@ -67,6 +65,13 @@ For the skewed dataset, the skew is introduced in the \textit{lo\_quantity} colu
 In the uniform dataset, each value in the domain [1, 50] is equally likely to appear in the \textit{lo\textunderscore quantity} column.
 In the skewed dataset, 90\% values fall in the range [1, 10]. 
 
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\columnwidth]{policy/figures/ssb-all-uniform-fair-cpu-util.pdf}
+	\caption{CPU utilization of queries in fair policy}
+	\label{fig:fair-cpu-util}
+\end{figure}
+
 \subsection{Evaluation of Policies}\label{ssec:policy-eval}
 In this section, we evaluate the policies that are currently implemented in the system.
 %All the policies are specified in terms of the CPU resources. 
@@ -80,11 +85,11 @@ As described in Table~\ref{table:policy-interpreatations}, the policy specificat
 The CPU utilization of the queries is depicted in Figure~\ref{fig:fair-cpu-util}.
 As we can see, the CPU utilization of all the queries remains nearly equal to each other during the workload execution, despite queries belonging to different query classes with varying query complexities.
 
-\begin{figure}[t]
+\begin{figure}[ht]
 	\centering
-	\includegraphics[width=\columnwidth]{policy/figures/ssb-all-uniform-fair-cpu-util.pdf}
-	\caption{CPU utilization of queries in fair policy}
-	\label{fig:fair-cpu-util}
+	\includegraphics[width=\columnwidth]{policy/figures/fair-stddev}
+	\caption{Standard deviation of CPU utilization of active queries for fair policy}
+	\label{fig:stddev-active-queries-fair}
 \end{figure}
 
 Notice that the available CPU resources also get automatically distributed elastically among the active queries (e.g. at the 10 and 18 seconds marks) when a query finishes its execution. 
@@ -98,12 +103,12 @@ Notice that for the first 7 seconds when all 13 SSB queries are under execution,
 As more queries finish their execution, there is a transient phase (notice the peaks) after which the standard deviation drops to low levels. 
 This experiment also reinforces the previous results quantitatively, and shows that the implementation is able to meet the policy specifications.
 
-\begin{figure}[t]
+\begin{figure*}
 	\centering
-	\includegraphics[width=\columnwidth]{policy/figures/fair-stddev}
-	\caption{Standard deviation of CPU utilization of active queries for fair policy}
-	\label{fig:stddev-active-queries-fair}
-\end{figure}
+	\includegraphics[width=\textwidth]{policy/figures/ssb-hpf-all.pdf}
+	\caption{CPU utilization in HPF policy. Note that $a.b  (N)$ denotes a SSB query $a.b$ with priority $N$}
+	\label{fig:hpf-all}
+\end{figure*}
 
 \subsubsection{HPF}
 Now we validate if the implementation matches the 
@@ -123,12 +128,12 @@ As the higher priority queries finish their execution (i.e. at the 7 and 16 seco
 
 The result of this experiment also demonstrates that \sys{}'s scheduler design naturally supports query suspension, which is an important concern in workload management. 
 
-\begin{figure}[t]
+\begin{figure*}[h]
 	\centering
-	\includegraphics[width=\columnwidth]{policy/figures/ssb-hpf-all.pdf}
-	\caption{CPU utilization in HPF policy. Note that $a.b  (N)$ denotes a SSB query $a.b$ with priority $N$}
-	\label{fig:hpf-all}
-\end{figure}
+	\includegraphics[width=\textwidth]{policy/figures/ssb-priority-uniform-2queries-perclass-cpu-util.pdf}
+	\caption{CPU allocation for proportional priority policy. Note that $a.b  (N)$ denotes a SSB query $a.b$ with priority $N$}
+	\label{fig:pp-cpu-util}
+\end{figure*}
 
 \subsection{Proportional Priority Policy}
 Now we examine the scheduler's behavior to the proportional priority policy %(cf. Section~\ref{ssec:proportional-priority}, 
@@ -150,18 +155,18 @@ resources.
 Also note that among the queries belonging to the same class, the CPU utilization is 
 nearly the same, as described in the policy specifications.
 
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=\columnwidth]{policy/figures/ssb-priority-uniform-2queries-perclass-cpu-util.pdf}
-	\vspace{-2.5em}
-	\caption{CPU allocation for proportional priority policy. Note that $a.b  (N)$ denotes a SSB query $a.b$ with priority $N$}
-	\label{fig:pp-cpu-util}
-	%	\vspace{-1em}
-\end{figure}
-
 \subsection{Impact of Learning on the Relative CPU Utilization}\label{ssec:learning-impact-cpu-util}
+
 In this experiment, we compare the learning-based scheduler with a static non-learning based implementation (baseline).
 We perform the comparison using fair policy, which should be the easiest policy for a static method to realize.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{policy/figures/q1-q11-ratio-cpu-util.pdf}
+	\caption{Ratio of CPU utilizations  $\frac{Q4.1}{Q1.1}$ for learning and non-learning 
+		implementations}
+	\label{fig:non-learning-comparison}
+\end{figure}
 
 In the baseline, the probability assigned to each query remains fixed unless either a query is added or removed from the system.
 If there are $N$ active concurrent queries in the system, each query gets a fixed probability $1/N$.
@@ -178,14 +183,6 @@ As per the policy specifications, the CPU utilization for both queries in the fa
 should be equal. % to each other, which means the ideal ratio is 1.
 Figure~\ref{fig:non-learning-comparison} shows the results of this experiment.
 %We restrict the X-axis until both the queries are under execution. 
-
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=\columnwidth]{policy/figures/q1-q11-ratio-cpu-util.pdf}
-	\caption{Ratio of CPU utilizations  $\frac{Q4.1}{Q1.1}$ for learning and non-learning 
-		implementations}
-	\label{fig:non-learning-comparison}
-\end{figure}
 
 Observe in Figure~\ref{fig:non-learning-comparison}, that the ratio in the non-learning implementation is closer to 2, meaning that the 
 implementation is biased towards $Q4.1$. 
@@ -229,6 +226,19 @@ We use two query streams, one for $Q1.1$ and another for $Q4.1$.
 As one instance of $Q4.1$ finishes execution, another instance of $Q4.1$ enters the system (likewise for $Q1.1$).
 We compare the throughput for both $Q4.1$ and $Q1.1$ using the learning implementation of the fair policy against its non-learning implementation.
 
+\begin{figure}[ht]
+	\centering
+	\begin{subfigure}[b]{0.5\textwidth}
+		\includegraphics[width=\textwidth]{policy/figures/q11-throughput.pdf}
+	\end{subfigure}%	
+	~
+	\begin{subfigure}[b]{0.5\textwidth}
+		\includegraphics[width=\textwidth]{policy/figures/q41-throughput.pdf}
+	\end{subfigure}%	   
+	\caption{Impact of learning on the throughput}
+	\label{fig:q11-q41-throughput}
+\end{figure}
+
 %In real life workloads, there is often a mix of queries with different query execution times.
 %Based on this setting, we assume two users of the database system issuing concurrent queries. 
 %One user issues short running queries and another user issues longer running queries. 
@@ -262,19 +272,7 @@ For the predicate $lo\textunderscore quantity \leq 25$ on the skewed table, some
 %	\subfigure[$Q1.1$]{\includegraphics[width=60mm]{policy/figures/q11-throughput.pdf}}
 %	\subfigure[$Q4.1$]{\includegraphics[width=60mm]{policy/figures/q41-throughput.pdf}}
 
-\begin{figure}[t]
-	\centering
-    \begin{subfigure}[b]{0.5\textwidth}
-    	\includegraphics[width=\textwidth]{policy/figures/q11-throughput.pdf}
-    \end{subfigure}%	
-    ~
-    \begin{subfigure}[b]{0.5\textwidth}
-    	\includegraphics[width=\textwidth]{policy/figures/q41-throughput.pdf}
-    \end{subfigure}%	   
-	\caption{Impact of learning on the throughput}
-	\label{fig:q11-q41-throughput}
-\end{figure}
-	
+
 %To test the scheduler's ability to learn in the presence of skew, 
 We compare the predicted work order times for each query with its observed work order times. % for the same query.
 %For completion, we perform the same experiment on the skewed data and uniform data. 

@@ -2,17 +2,10 @@
 \section{Background}\label{sec:background}
 In this section we establish some prerequisites for the proposed Quickstep scheduler framework.
 \sys{}~\cite{quickstep-system} is an open-source relational database engine 
-% and SQL as its query language.  \sys{} 
 designed to efficiently leverage contemporary hardware aspects such as large main memory, multi-core, and multi-socket server settings. 
-%The system aims to deliver high performance in read-mostly data warehousing 
-%environments.  
-%While \sys{} targets environments in which datasets are mostly memory resident, it can also answer queries on datasets that do not fit in memory, as all the data are accessed via a buffer pool, that supports page evictions and replacements. 
-% However,  the implementation of \sys{} largely targets settings in which the  entire 
-%database fits in memory.
 
 The control flow associated with query execution in \sys{} involves first parsing the query, and then optimizing the query using a cost-based query optimizer.
 The optimized query plan is represented as a Directed Acyclic Graph (DAG) of relational operator primitives. 
-%Currently, the system employs hash-based implementation for join and aggregate operators. 
 The query plan DAG is then sent to a \textit{scheduler}, which is the focus of this chapter. 
 The scheduler runs as a separate thread and coordinates the execution of all queries. 
 Apart from the scheduler, \sys{} has a pool of worker threads that carry out computations on the data. 
@@ -43,8 +36,6 @@ indices are currently supported.
 The blocks are free to self-organize themselves and thus a given table may have blocks in different formats. 
 For example, new blocks in a table may be in a row store format, while older blocks may 
 be in a column store format.
-%The block size is configurable %(in fact blocks in the same table can be of 
-%%different sizes), %and the recommended block size is 4 MB.
 
 This storage block design, as articulated earlier in~\cite{quickstep-storage} enables the query execution to be broken down into a set of independent tasks on each block. 
 This is a crucial aspect that we leverage in the design of our scheduler. 
@@ -57,7 +48,6 @@ by the buffer pool.
 The buffer pool manager employs an LRU-2 replacement policy. 
 Thus, it is possible for a hash table to get evicted to disk, if it has become ``cold''; e.g. if it belongs to a suspended query.
 
-
 \section{Work Orders}\label{sec:workorders}
 Work done for executing a query in \sys{} is split into multiple \textit{work 
 	orders}. %, as highlighted in Section~\ref{sec:background}. 
@@ -67,13 +57,6 @@ A work order encapsulates the relational operator that is being applied, the rel
 input relation(s), location of the input data block, any predicate(s) to be 
 applied on the tuples in the input block, and descriptors to other run-time 
 structures (such as hash tables).
-%The input data location is specified in terms of a unique storage block ID, a join hash table identifier, or an aggregation hash table identifier. 
-%In NUMA settings, a work order can also provide a preferred site for execution in the 
-%form of a NUMA socket ID. 
-%The scheduler then uses this information to make a 
-%\textit{data-locality aware} scheduling decision. \reminder{Should we remove NUMA 
-%because there are no experiments?}
-
 Consider the following full table scan query to illustrate the work order concept:
 
 \begin{lstlisting}[language=SQL, 
