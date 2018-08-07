@@ -3,22 +3,9 @@ In this section we model the performance of queries with and without pipelining,
 Our model is primarily meant for in-memory environments, but it can be easily extended to disk settings, as we show in Section~\ref{ssec:model-disk}.
 We use two key ideas in formulating our model, which we describe below.
 
-First idea is to focus on the difference between the two strategies while ignoring the similarities between them.
-Many operations are common to query processing with and without pipelining: e.g. the total cost of reading from L1 cache is the same irrespective of the schedule.
-As we are interested in a relative comparison of the two strategies, it is safe to ignore the costs of operations which are common to both strategies and focus on the additional work for each strategy that is not present in the other strategy. 
-
-Our second idea is that when dealing with multi-megabyte blocks in a sequential access pattern, the cost of L3 cache misses of reading the block is less than missing the entire block.
-This idea is based on the usefulness of hardware prefetching. 
-As the block is read into memory, initial few tuples would incur an L3 cache miss, but we assume that the prefetcher can quickly detect the access pattern and thus beyond a point, the miss penalty would decrease. 
-
-We analyze a basic pipeline of length two, in which the producer is a select operator and the consumer is a probe operator for a hash-based join. 
-This pipeline can be found in many TPC-H queries like Q07 and Q19 in which the selection is performed on the \textit{lineitem} table and the output is subsequently used to probe a join hash table.
-Pipelines of higher lengths and/or different operators can be dealt with similarly.
-Table~\ref{table:analytical-model-notation} contains various parameters that we use to determine the costs for different scheduling strategies.
-
 \begin{table}
 	\centering
-	\begin{tabular}{|l|p{8cm}|}
+	\begin{tabular}{|l|p{10cm}|}
 		\hline
 		\textbf{Notation} & \textbf{Description} \\
 		\hline
@@ -35,6 +22,19 @@ Table~\ref{table:analytical-model-notation} contains various parameters that we 
 	\caption{\textbf{Notations used for the analytical model}}
 	\label{table:analytical-model-notation}
 \end{table}
+
+First idea is to focus on the difference between the two strategies while ignoring the similarities between them.
+Many operations are common to query processing with and without pipelining: e.g. the total cost of reading from L1 cache is the same irrespective of the schedule.
+As we are interested in a relative comparison of the two strategies, it is safe to ignore the costs of operations which are common to both strategies and focus on the additional work for each strategy that is not present in the other strategy. 
+
+Our second idea is that when dealing with multi-megabyte blocks in a sequential access pattern, the cost of L3 cache misses of reading the block is less than missing the entire block.
+This idea is based on the usefulness of hardware prefetching. 
+As the block is read into memory, initial few tuples would incur an L3 cache miss, but we assume that the prefetcher can quickly detect the access pattern and thus beyond a point, the miss penalty would decrease. 
+
+We analyze a basic pipeline of length two, in which the producer is a select operator and the consumer is a probe operator for a hash-based join. 
+This pipeline can be found in many TPC-H queries like Q07 and Q19 in which the selection is performed on the \textit{lineitem} table and the output is subsequently used to probe a join hash table.
+Pipelines of higher lengths and/or different operators can be dealt with similarly.
+Table~\ref{table:analytical-model-notation} contains various parameters that we use to determine the costs for different scheduling strategies.
 
 In the pipelining based execution, the input for \texttt{probe} (which is the output of \texttt{select}) is presumed to be hot in caches while it is read to perform the probe operation. 
 In the non-pipelining case, the output of \texttt{select} is not immediately consumed by the \texttt{probe}, thus an input probe block is likely to be cold in the caches when it is read for the \texttt{probe} operation.
