@@ -67,13 +67,11 @@ emph={San,Diego},
 emphstyle=\color{bondiblue}\bfseries]
 SELECT name FROM Employee WHERE city=`San Diego'
 \end{lstlisting}	
-\vspace{-0.4em}
 
 The plan for this query has a simple \textit{selection} operator.  
 For the selection operator, the number of work orders is same as the number of input blocks in the \verb+Employee+ table. 
 Each selection work order contains the following information:
 \begin{itemize}
-	\itemsep0.1em
 	\item {Relation: \verb+Employee+, attribute: \verb|name|}
 	\item {Predicate: \lstinline[language=SQL, 
 		basicstyle=\ttfamily\small, 

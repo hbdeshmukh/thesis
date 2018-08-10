@@ -59,10 +59,8 @@ Similarly, the other drop operators indicate when intermediate data can be delet
 \begin{figure}[]
 	\centering
 	\includegraphics[width=\columnwidth]{policy/figures/QueryPlan.pdf}
-	\vspace*{-2em}
 	\caption{\textbf{A join query and its DAG}}
 	\label{fig:dag}
-%	\vspace*{-1.5em}
 \end{figure}
 
 The Query Manager uses a DAG Traversal algorithm (cf. Algorithm~\ref{alg:dag-traversal}) to process the DAG, which essentially is an iterative graph traversal method. 
@@ -189,10 +187,8 @@ The results of aggregation are stored in per-thread private hash tables, which a
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=\columnwidth]{policy/figures/q11-q41-time-per-wo.pdf}
-	\vspace{-2.5em}
 	\caption{\textbf{Time per work order for SSB Q1.1 and Q4.1}}
 	\label{fig:q1.1-q4.1-time-per-wo}
-%	\vspace{-2em}
 \end{figure}
 
 Now we analyze the execution pattern for $Q4.1$ which has 4 join operations. 
@@ -271,10 +267,8 @@ In the remainder of this section, we provide an intuition for deriving probabili
 \begin{figure}[]
 	\centering
 	\includegraphics[width=\columnwidth]{policy/figures/Probability-explanation.pdf}
-	\vspace{-2em}
 	\caption{\textbf{Scheduling queries having different work order execution times for the fair policy. The solid boxes with $Q_{i}$ depicts the lifetime of a work order from the Query $Q_{i}$}}
 	\label{fig:probability-explanation}
-	%	\vspace{-1.5em}
 \end{figure}
 
 We now motivate the probabilistic approach used by the Policy Enforcer with an example.
