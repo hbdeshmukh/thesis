@@ -2,9 +2,9 @@
 %\paragraph{Scheduling on a high level}
 Computer programs need computing, storage and communication resources to function. 
 Usually the availability of such resources is limited and the system has to share these resources among multiple users. 
-Resource management is an important aspect of a system.
+Resource management is an important aspect of running a system.
 Scheduling falls under the umbrella of resource management. 
-It can be viewed as a governance model that \textit{governs} how the resources are shared among users and how various parts of the system function together. 
+It can be viewed as a governance model that governs how resources are shared among users and how various parts of the system function together. 
 The governance model is designed so as to meet goals about resource management and performance of the system. 
 As an example, an operating system uses resources such as memory, CPUs, and disk.
 It allows multiple processes to use these resources at the same time through sophisticated scheduling techniques. 
@@ -12,13 +12,13 @@ It allows multiple processes to use these resources at the same time through sop
 %\paragraph{Scheduling's history}
 Scheduling has been studied extensively in many communities including computer science theory, computer systems, and industrial engineering~\cite{Bouganim:1998:MSL:288627.288646, dist-based-scheduling,iCBS-SLA,  DBLP:conf/rtss/HaritsaLC91, DBLP:journals/csur/KwokA99, linn1999hybrid, pinedo2016scheduling, ULLMAN1975384, lottery-scheduling}. 
 Typically a scheduling problems involves finding a schedule with a certain objective.
-The desired solution is the one that either meets the objective or gets close to it.
+The desired solution is the one that either meets the objective or gets close to meeting it.
 Many scheduling problems are difficult in nature.
-For example, the problem of scheduling $N$ jobs each with a unit execution time on $k$ processors such that the makespan of the schedule is minimized is NP complete~\cite{ULLMAN1975384}.
+For example, the problem of scheduling $N$ jobs each with a unit execution time on $k$ processors such that the makespan of the schedule is minimized, is NP complete~\cite{ULLMAN1975384}.
 Some of the standard techniques used to solve scheduling problems are: using domain specific heuristics, dynamic programming, greedy algorithms, and approximation algorithms. 
 
 %\paragraph{Scheduling for databases}
-In this dissertation, we establish the role of scheduling for modern database systems.
+In this dissertation, we establish the role of scheduling in modern database systems.
 We show that scheduling can play a critical role in the functioning of the database system and can be used to meet various objectives such as resource allocation and query performance.
 
 Before understanding the scheduling problem itself, we dive into the \textit{modern} aspect of modern database systems.

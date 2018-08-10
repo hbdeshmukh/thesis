@@ -47,6 +47,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{charter}
 \usepackage[expert]{mathdesign}
+\usepackage[hidelinks]{hyperref}
 
 %% Chaitanya
 \usepackage{pbox}
@@ -71,6 +72,8 @@
 \newcommand{\todo}[1]{}
 \renewcommand{\todo}[1]{{\color{red} TODO: {#1}}}
 
+\newcommand{\hsp}{\hspace{20pt}}
+
 \theoremstyle{plain}
 \newtheorem{example}{Example}
 
@@ -83,29 +86,26 @@
 % note: run "make clean" if swtiching from hyperref to non-hyperref, and
 % vice versa, as they use different TOC file markups.
 
-\usepackage[hidelinks]{hyperref}
-
-% 
 % \definecolor{links}{rgb}{0.5,0,0} 
 % \definecolor{cites}{rgb}{0,0.5,0} 
 % \definecolor{urls}{rgb}{0,0,0.5} 
 
 \definecolor{cardinal}{rgb}{0.77, 0.12, 0.23}
 \definecolor{bondiblue}{rgb}{0.0, 0.58, 0.71}
+\definecolor{gray75}{gray}{0.75}
 
-% 
-% \hypersetup{
-%     bookmarks=true,         % show bookmarks bar?
-%     pdftitle={A PhD Thesis},
-%     pdfauthor={Buckingham M. Badger},
-%     pdfkeywords={machine learning, badgers, beer},
-%     pdfnewwindow=true,      % links in new window
-%     colorlinks=true,       % false: boxed links; true: colored links
-%     linkcolor=links,          % color of internal links
-%     citecolor=cites,        % color of links to bibliography
-%     % filecolor=black,      % color of file links
-%     urlcolor=urls           % color of extern	al links
-% }
+  \hypersetup{
+     bookmarks=true,         % show bookmarks bar?
+     pdftitle={Efficient Query Scheduling},
+     pdfauthor={Harshad Deshmukh},
+     pdfkeywords={scheduling, database system, in-memory},
+     pdfnewwindow=true,      % links in new window
+     colorlinks=false,       % false: boxed links; true: colored links
+     linkcolor=links,          % color of internal links
+     citecolor=cites,        % color of links to bibliography
+     % filecolor=black,      % color of file links
+     urlcolor=urls           % color of extern	al links
+ }
 
 % my custom definitions
 %\usepackage{mymacros}

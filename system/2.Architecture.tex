@@ -22,7 +22,7 @@ Table~\ref{table:types} describes the various types currently supported by \Quic
 		\multirow{5}{*}{\textbf{Numeric types}} &  \small{\texttt{INTEGER} (32-bit signed)} \\ & \small{\texttt{BIGINT}/\texttt{LONG} (64-bit signed)} \\  & \small{\texttt{REAL}/\texttt{FLOAT} (IEEE 754 \textit{binary32} format)} \\ & \small{\texttt{DOUBLE PRECISION} (IEEE 754 \textit{binary64} format)} \\ & \small{fixed-point \texttt{DECIMAL}} \\ \hline
 		\multirow{5}{*}{\textbf{Non-numeric types}} & \texttt{CHAR} strings \\ & variable-length  \texttt{VARCHAR} strings \\ & \texttt{DATETIME}/\texttt{TIMESTAMP} (microsecond resolution) \\ & Date-time \texttt{INTERVAL} \\ & Year-month \texttt{INTERVAL} \\ \hline  
 	\end{tabular}
-	\caption{Types in \Quickstep}
+	\caption{\textbf{Types in \Quickstep}}
 	\label{table:types}
 \end{table}
 %All these data types support \texttt{NULL} values including three-valued comparison logic. %The type system code is internally organized as a (C++) hierarchy, making it easy to add new types. %However, adding new types requires recompilation of the system; i.e., we do not have dynamic types or user-defined types, although the type system subcomponent has been designed to allow for such additions in the future. 

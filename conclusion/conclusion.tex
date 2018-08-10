@@ -1,8 +1,45 @@
 \chapter{Conclusions and Future Work}
-In this chapter, we present our conclusions and discuss the future work.
+In this chapter, we discuss the lessons learnt, present our conclusions, and describe the future work.
 Through this dissertation, we present the design and implementation of a query scheduler.
 The goal of this scheduler is to efficiently execute queries in an in-memory environment while effectively exploiting the features provided by the modern hardware. 
 A key contribution of this dissertation is to demonstrate that the scheduler is capable of playing an important role in the database system architecture.
+
+\section{Lessons Learnt}
+We now discuss the lessons learnt from this dissertation.
+
+\subsection{Importance of Abstraction and Contracts}
+A good abstraction is vital for developing a good system. 
+The work order abstraction in Quickstep proved to be a boon for the query scheduler. 
+It allowed us to construct different layers on top of simple operator execution, for which the  abstraction was created. 
+
+There was a clarity of the contract between query optimizer and query scheduler: the query optimizer creates an immutable query plan (DAG of relational operators), which is then passed on to the query scheduler. 
+Once the query scheduler starts to operate on the query plan, there is no going back to the optimizer. 
+
+We designed the operators to be stateful and allowed the scheduler to access their state thereby getting more insights about the query execution progress.
+The book-keeping related data structures are handled only by the scheduler thread, thus they need not be thread-safe, which helped simplify their design. 
+
+\subsection{Importance of Query Scheduler for high performance}
+Achieving high performance is a never unending pursuit for database systems. 
+Though the scheduler has a lot of power in terms of controlling resources and co-ordinating the query execution, it still needs support from other modules in the database system for high performance.
+Query optimizer is a vital component of the system. 
+Scheduling work for an optimal query plan is far more effective than that for a poor plan. 
+Moreover, efficient implementation of relational operators is crucial to leverage the most from the hardware. 
+Therefore, even though the scheduler is an important piece in the overall puzzle, it must work in tandem with other components in the system. 
+
+\subsection{Importance of Measurement, Estimation, and Analysis}
+Measuring and estimating performance in systems is highly important. 
+Back-of-the-envelope calculations is a handy technique that can be useful to anticipate the effect of a technique or a change.
+By doing such calculations, we may be able to save a lot of development effort. 
+
+Our work on revisiting pipelining relied heavily on measuring performance and analyzing the impact of various techniques on performance. 
+We made lot of mistakes in attributing performance changes to wrong reasons and learnt some valuable lessons the hard way.
+
+While dealing with multiple dimensions, it is important to adhere to basic scientific principles. 
+As an example, do not change two parameters at once, if we have to study the impact of change in one parameter.
+
+%Between multi-core CPU and memory, which are the primary kinds of resources used by an in-memory database system; CPU is 
+\section{Conclusions}
+We now discuss the conclusions from individual chapters of this dissertation. 
 
 In Chapter~\ref{chap:quickstep}, we present the design and implementation of the Quickstep database system. 
 Quickstep has a unique block based storage management system, that supports variety of storage formats such as row store, column store along with support for compression. 
