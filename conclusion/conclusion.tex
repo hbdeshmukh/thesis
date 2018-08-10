@@ -68,20 +68,19 @@ We compare pipelining with a non-pipelining strategy in which the said interleav
 The two strategies differ primarily in the eagerness of data processing by the consumer operator. 
 We underscore the impact of various parameters such as number of threads, the size of blocks, and hardware prefetching on the relative performance of the two pipelining strategies. 
 Our analysis shows that the relative gap between the two strategies is not as high as in the disk based settings. 
-An important reason behind the similar performance lies in the execution time distribution between operators
-in the query plan.
-Many queries have certain dominant operators, that subside the impact of pipelining on query performance.
+We highlight that the impact of pipelining on query processing should be considered holistically with all the parameters listed earlier. 
+%One key contribution through our study is the importance of degree of parallelism in query performance. 
+%Pipelining can provide superior performance in cases when operators in the pipeline have scalability issues (with increasing number of threads). 
+%We present an algorithm that sequences the various pipelines in a query plan with the goal of maximizing query performance.  
+%Our evaluation on TPC-H queries show that the algorithm often produces pipeline sequences with better performance than other pipeline sequences. 
 
-One key contribution through our study is the importance of degree of parallelism in query performance. 
-Pipelining can provide superior performance in cases when operators in the pipeline have scalability issues (with increasing number of threads). 
-We present an algorithm that sequences the various pipelines in a query plan with the goal of maximizing query performance.  
-Our evaluation on TPC-H queries show that the algorithm often produces pipeline sequences with better performance than other pipeline sequences. 
-
+\subsection{Future Work}
 Our scheduling work leads to many interesting future work directions.
 There is an ongoing effort to make Quickstep work efficiently on a distributed setup. 
 The distributed setting offers some challenges which are not as relevant in the in-memory single node setting.
 Locality of a work order execution is quite important in the distributed setting.
 The penalty of a non-local execution involves high data movement cost over network, which can degrade query performance.
+
 Load balancing is another important aspect that a distributed query scheduler has to worry about.
 Overloading a node with work can throttle the query processing and may cause bottlenecks.
 A subtle aspect in distributed query scheduling is that the control traffic (e.g. dispatching a work order, reeving work order completion feedback) may be expensive.
