@@ -67,7 +67,7 @@ We cast pipelining as a schedule in which consumer tasks (or work orders) are in
 We compare pipelining with a non-pipelining strategy in which the said interleaving is not present. 
 The two strategies differ primarily in the eagerness of data processing by the consumer operator. 
 We underscore the impact of various parameters such as number of threads, the size of blocks, and hardware prefetching on the relative performance of the two pipelining strategies. 
-Our analysis shows that the relative gap between the two strategies is not as high as in the disk based settings. 
+Our analysis (based on evaluation on TPC-H queries as well as an analytical model and microbenchmarking) shows that the relative gap between the two strategies is not as high as in the disk based settings. 
 We highlight that the impact of pipelining on query processing should be considered holistically with all the parameters listed earlier. 
 %One key contribution through our study is the importance of degree of parallelism in query performance. 
 %Pipelining can provide superior performance in cases when operators in the pipeline have scalability issues (with increasing number of threads). 
