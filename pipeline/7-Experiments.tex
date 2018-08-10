@@ -125,9 +125,9 @@ After analyzing the performance of deep pipelines, we further zoom out to look a
 We compare the overall execution time of queries using pipelining and non-pipelining strategies. 
 %We use column store storage format for base tables and use a block size of 2 MB for stored tables and temporary tables.
 
-\begin{figure}
-	\centering 
-	\includegraphics{pipeline/figures/colstore-20threads-bs2mb-withlip-alltpch}
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{pipeline/figures/colstore-20threads-bs2mb-withlip-alltpch}
 	\caption{\textbf{Execution times of TPC-H queries with base tables in column store format and block size 2 MB}}
 	\label{fig:absolute-times-all-tpch-bs2mb-20threads}
 \end{figure}
@@ -171,7 +171,7 @@ As a result, we expect that the impact of pipelining on overall query execution 
 
 \begin{figure*}
 	\centering 
-	\includegraphics{pipeline/figures/rowstore-20threads-bs2mb-withlip-alltpch}
+	\includegraphics[width=\textwidth]{pipeline/figures/rowstore-20threads-bs2mb-withlip-alltpch}
 	\caption{\textbf{Execution times of TPC-H queries with base tables using row store format and block size of 2 MB}}
 	\label{fig:absolute-times-all-tpch-bs2mb-20threads-rowstore}
 \end{figure*}
@@ -244,25 +244,25 @@ Figure~\ref{fig:prefetching-vs-noprefetching-rowstore} presents the improvements
 	\centering 
 	\begin{subfigure}[ht]{0.225\textwidth}
 		\includegraphics[width=\textwidth]{pipeline/figures/prefetching-total-execution-time-withlip-rowstore}
-		\caption{TPC-H execution time}
+		\caption{TPC-H execution}
 		\label{fig:prefetching-total}
 	\end{subfigure}
 	~
 	\begin{subfigure}[ht]{0.225\textwidth}
 		\includegraphics[width=\textwidth]{pipeline/figures/prefetching-q07-select-withlip-rowstore}
-		\caption{Q07 selection on \textit{lineitem}}
+		\caption{Selection}
 		\label{fig:prefetching-select-q07}
 	\end{subfigure}
 	%
 	\begin{subfigure}[ht]{0.225\textwidth}
 		\includegraphics[width=\textwidth]{pipeline/figures/prefetching-q07-build-withlip-rowstore}
-		\caption{Q07 build hash on \textit{orders}}
+		\caption{Build hash table}
 		\label{fig:prefetching-build-q07}
 	\end{subfigure}
 	~
 	\begin{subfigure}[ht]{0.225\textwidth}
 		\includegraphics[width=\textwidth]{pipeline/figures/prefetching-q07-probe-withlip-rowstore}
-		\caption{Q07 probe hash table}
+		\caption{Probe hash table}
 		\label{fig:prefetching-probe-q07}
 	\end{subfigure}
 	\caption{\textbf{Performance of row store format with and without hardware prefetching. Shown above are total TPC-H execution times and median \wo{} execution times for selection, probe and build hash operators in Q07 with various block sizes}}

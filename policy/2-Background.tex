@@ -10,7 +10,8 @@ The query plan DAG is then sent to a \textit{scheduler}, which is the focus of t
 The scheduler runs as a separate thread and coordinates the execution of all queries. 
 Apart from the scheduler, \sys{} has a pool of worker threads that carry out computations on the data. 
 
-\sys{} uses a query execution paradigm (built using previously proposed approaches~\cite{quickstep-storage,morsel}), in which a query is executed as a sequence of \textit{work orders}. 
+\sys{} uses a query execution paradigm, which is built using previously proposed approaches~\cite{quickstep-storage,morsel}.
+In this paradigm a query is executed as a sequence of \textit{work orders}. 
 A work order operates on a data block, which is treated as a self-contained mini-database~\cite{quickstep-storage}.  (c.f. Section~\ref{sec:workorders} for examples of work orders)
 The computation that is required for each operator in a query plan is decomposed into a sequence of work orders. 
 For example, a select operator produces as many work orders as there are blocks in the input table. 

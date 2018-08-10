@@ -106,15 +106,30 @@ The results for this experiment are shown in Figure~\ref{fig-ssb-sf50-widetable}
 %Curiously, if we compare Figures~\ref{fig-ssb-sf50-detail} and~\ref{fig-ssb-sf50-widetable} we noticed that \Quickstep\ benefits from the denormalization technique by a factor of about 5X. However, MonetDB actually gets a little slower.
 MonetDB struggles with the WideTable that has 58 attributes. MonetDB uses a BAT file format, in which it stores the pair (attribute and object-id) for each column. In contrast, \Quickstep's block-based storage design does not have the overhead of storing the object-id/tuple-id for each attribute (and for each tuple). The disk footprint of the database file is only 42 GB for \Quickstep\ while it is 99 GB for MonetDB. Tables with such large schemas hurt MonetDB, while \Quickstep's storage design allows it to easily deal with such schemas. Since queries now do not require joins (they become scans on the WideTable), \Quickstep\ sees a significant increase in performance.
 \Quickstep\ is also about \textbf{2X} faster than VectorWise, likely because of similar reasons as that for MonetDB. To the best of our knowledge, the internal details about VectorWise's implementation have not been described publicly, but they likely inherit aspects of MonetDB's design, since the database disk footprint is 63 GB.
+%
+%\twoabfigures
+%{system/figures/ssb-sf100-storage-format-comparison-total}
+%{system/figures/ssb-sf100-storage-format-comparison}
+%{\textbf{Impact of storage format on performance for SSB scale factor 100}}
+%{fig-ssb-sf100-rowstore}
+%{Overall speedup}
+%{Detailed query speedups}
+%{bht}
 
-\twoabfigures
-{system/figures/ssb-sf100-storage-format-comparison-total}
-{system/figures/ssb-sf100-storage-format-comparison}
-{\textbf{Impact of storage format on performance for SSB scale factor 100}}
-{fig-ssb-sf100-rowstore}
-{Overall speedup}
-{Detailed query speedups}
-{bht}
+\begin{figure}[ht]
+	\centering 
+	\begin{subfigure}{0.2\textwidth}
+		\includegraphics[width=\textwidth]{system/figures/ssb-sf100-storage-format-comparison-total}
+		\caption{Overall}
+	\end{subfigure}
+	~
+	\begin{subfigure}{0.7\textwidth}
+		\includegraphics[width=\textwidth]{system/figures/ssb-sf100-storage-format-comparison}
+		\caption{Detailed query speedups}
+	\end{subfigure}
+	\caption{\textbf{Impact of storage format on performance for SSB scale factor 100}}
+	\label{fig-ssb-sf100-rowstore}
+\end{figure}
 
 \Quickstep's speedup over the other systems also continues when working with tables with a large number of attributes. Compared to Spark and PostgreSQL, \Quickstep\ is \textbf{70X} and \textbf{640X} faster. Notice that compared to the other systems, PostgreSQL has only a pure row-store implementation, which hurts it significantly when working with tables with a large number of attributes.
 
@@ -146,15 +161,30 @@ We present the TPC-H results in Chapter~\ref{chap:pipeline}, where we also discu
 
 \subsection{Template Metaprogramming Impact}
 \label{sec:expt:vectorization}
+%
+%\twoabfigures
+%{system/figures/copy-elision-comparison-total}
+%{system/figures/copy-elision-comparison}
+%{\textbf{Impact of template metaprogramming.}}
+%{fig-template-metaprogramming}
+%{Change in total time.}
+%{Change in the detailed query execution times.}
+%{bht}
 
-\twoabfigures
-{system/figures/copy-elision-comparison-total}
-{system/figures/copy-elision-comparison}
-{\textbf{Impact of template metaprogramming.}}
-{fig-template-metaprogramming}
-{Change in total time.}
-{Change in the detailed query execution times.}
-{bht}
+\begin{figure}[ht]
+	\centering 
+	\begin{subfigure}{0.2\textwidth}
+		\includegraphics[width=\textwidth]{system/figures/copy-elision-comparison-total}
+		\caption{Total time}
+	\end{subfigure}
+	~
+	\begin{subfigure}{0.7\textwidth}
+		\includegraphics[width=\textwidth]{system/figures/copy-elision-comparison}
+		\caption{Individual query execution times}
+	\end{subfigure}
+	\caption{\textbf{Impact of template metaprogramming: Changes in total time and individual query times}}
+	\label{fig-template-metaprogramming}
+\end{figure}
 
 Next, we toggle the use of the template metaprogramming (see Section~\ref{ssec:expression-eval}), using the SSB 100 scale factor dataset. Specifically, we change the compile time flag that determines whether the \texttt{ValueAccessor} is constructed by copying attributes (Basic) or by providing an indirection (Selection). The results for this experiment are shown in Figure~\ref{fig-template-metaprogramming}.
 

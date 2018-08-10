@@ -1,12 +1,12 @@
 \chapter{Introduction}
 %\paragraph{Scheduling on a high level}
 Computer programs need computing, storage and communication resources to function. 
-Usually the availability of such resources is limited and the system has to share these resources among multiple users. 
+Usually the availability of such resources is limited and the system has to share them among multiple users. 
 Resource management is an important aspect of running a system.
 Scheduling falls under the umbrella of resource management. 
 It can be viewed as a governance model that governs how resources are shared among users and how various parts of the system function together. 
 The governance model is designed so as to meet goals about resource management and performance of the system. 
-As an example, an operating system uses resources such as memory, CPUs, and disk.
+For example, an operating system uses resources such as memory, CPUs, and disk.
 It allows multiple processes to use these resources at the same time through sophisticated scheduling techniques. 
 
 %\paragraph{Scheduling's history}
@@ -65,9 +65,9 @@ Deployment concerns such as failover handling, installing additional capacity, u
 
 Today cloud databases have drastically changed the \textit{modus operandi} of database deployment.
 Cloud providers host and manage databases on cloud platforms and abstract away all the deployment pain points from the users.
-The database engine may be hosted on a number of hardware platforms or virtualized environments in the cloud.
+The database engine may be hosted on a number of hardware platforms or virtual environments in the cloud.
 
-Cloud databases promise the quality of their service in the form of a Service Layer Aggrement (SLA).
+Cloud databases promise the quality of their service in the form of a Service Layer Agreement (SLA).
 The most common form of SLA today is in terms of availability, which quantifies the extent to which the cloud database service would be available in a given time window. 
 As the extent of availability increases, the cost to the customer increases.
 We now discuss the implications of such a SLA in terms of resource management.
@@ -129,7 +129,7 @@ Thus the work orders abstraction is used by all the relational operators impleme
 \paragraph{Using the Quickstep Scheduler to meet different objectives:}
 We showcase the versatility of the Quickstep scheduler by demonstrating how it can be used to meet various objectives.
 Specifically we show the Quickstep scheduler in two scenarios.
-First, we show how the scheduler can allocate resources such as CPU to concurrent queries through well defined policies such as fair and prioirity-based policies.
+First, we show how the scheduler can allocate resources such as CPU to concurrent queries through well defined policies such as fair and priority-based policies.
 We propose a probabilistic scheduling approach, which gives the resource administrators a knob to allocate resources to concurrently running queries in the system.
 We believe that this work can be useful in the age of cloud databases, where the \textit{pay as you go} philosophy for resource consumption can become the norm.
 
@@ -145,4 +145,5 @@ We show the reasons for why these two strategies result in a similar performance
 
 Readers are advised that the content in this dissertation is based on previously published papers~\cite{DBLP:conf/bigdata/DeshmukhMP17, supplement, quickstep-system} and another manuscript under submission.
 Large sections of this dissertation are taken directly from these papers. 
-Quickstep is an open source project with its source code available at \url{https://github.com/apache/incubator-quickstep}.
+Quickstep is an open source project. 
+Interested readers can find its source code at: \url{https://github.com/apache/incubator-quickstep}.

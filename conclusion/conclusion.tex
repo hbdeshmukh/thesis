@@ -18,7 +18,7 @@ Once the query scheduler starts to operate on the query plan, there is no going 
 We designed the operators to be stateful and allowed the scheduler to access their state thereby getting more insights about the query execution progress.
 The book-keeping related data structures are handled only by the scheduler thread, thus they need not be thread-safe, which helped simplify their design. 
 
-\subsection{Importance of Query Scheduler for high performance}
+\subsection{Importance of Query Scheduler for High Performance}
 Achieving high performance is a never unending pursuit for database systems. 
 Though the scheduler has a lot of power in terms of controlling resources and co-ordinating the query execution, it still needs support from other modules in the database system for high performance.
 Query optimizer is a vital component of the system. 
@@ -68,7 +68,7 @@ We compare pipelining with a non-pipelining strategy in which the said interleav
 The two strategies differ primarily in the eagerness of data processing by the consumer operator. 
 We underscore the impact of various parameters such as number of threads, the size of blocks, and hardware prefetching on the relative performance of the two pipelining strategies. 
 Our analysis shows that the relative gap between the two strategies is not as high as in the disk based settings. 
-An important reason behind the similar performance lies in the executiontime distribution between operators
+An important reason behind the similar performance lies in the execution time distribution between operators
 in the query plan.
 Many queries have certain dominant operators, that subside the impact of pipelining on query performance.
 
@@ -84,10 +84,10 @@ Locality of a work order execution is quite important in the distributed setting
 The penalty of a non-local execution involves high data movement cost over network, which can degrade query performance.
 Load balancing is another important aspect that a distributed query scheduler has to worry about.
 Overloading a node with work can throttle the query processing and may cause bottlenecks.
-A subtle aspect in distributed query scheduling is that the control traffic (e.g. dispathing a work order, receving work order completion feedback) may be expensive.
+A subtle aspect in distributed query scheduling is that the control traffic (e.g. dispatching a work order, reeving work order completion feedback) may be expensive.
 Therefore the scheduler may have to batch or aggregate control messages.
 
-In the single node setting, the scheduler can play a big role in query processing on heterogenous hardware.
+In the single node setting, the scheduler can play a big role in query processing on heterogeneous hardware.
 An example of such system can be a server configured with an FPGA or a GPU.
-If the scheduler can understand the strengths and weaknesses of each hetereogenous hardware component, it can route work orders to different components appropriately. 
+If the scheduler can understand the strengths and weaknesses of each heterogeneous hardware component, it can route work orders to different components appropriately. 
 A key challenge in this problem is to understand the memory access costs for different hardware components and thus estimating the cost of executing operations.
